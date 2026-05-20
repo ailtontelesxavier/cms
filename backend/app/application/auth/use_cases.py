@@ -1,15 +1,17 @@
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from app.application.auth.ports import UserRepository
 from app.application.auth.schemas import (
     LoginRequest,
+    MFAChallengeRequest,
     MFASetupOut,
     MFAVerifyRequest,
     TokenOut,
     UserCreate,
     UserOut,
 )
+from app.core.config import settings
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.core.security import (
     create_token,
@@ -41,12 +43,7 @@ class AuthUseCases:
         if user.mfa_enabled:
             raise PermissionDeniedError("auth", "mfa_required")
 
-        token = create_token(
-            sub=str(user.id),
-            email=user.email,
-            roles=[r.name for r in user.roles],
-        )
-        return TokenOut(access_token=token)
+        return self._issue_tokens(user)
 
     async def refresh(self, refresh_token: str) -> TokenOut:
         try:
@@ -62,12 +59,20 @@ class AuthUseCases:
         if not user or not user.is_active:
             raise InvalidCredentialsError()
 
-        token = create_token(
-            sub=str(user.id),
-            email=user.email,
-            roles=[r.name for r in user.roles],
-        )
-        return TokenOut(access_token=token)
+        return self._issue_tokens(user)
+
+    async def mfa_challenge(self, data: MFAChallengeRequest) -> TokenOut:
+        user = await self.user_repo.get_by_email(data.email)
+        if not user or not verify_password(data.password, user.hashed_password):
+            raise InvalidCredentialsError()
+
+        if not user.mfa_enabled or not user.totp_secret:
+            raise InvalidMFATokenError()
+
+        if not verify_totp(user.totp_secret, data.totp):
+            raise InvalidMFATokenError()
+
+        return self._issue_tokens(user)
 
     async def setup_mfa(self, user_id: UUID) -> MFASetupOut:
         user = await self.user_repo.get_by_id(user_id)
@@ -94,12 +99,7 @@ class AuthUseCases:
         user.mfa_enabled = True
         await self.user_repo.update(user)
 
-        token = create_token(
-            sub=str(user.id),
-            email=user.email,
-            roles=[r.name for r in user.roles],
-        )
-        return TokenOut(access_token=token)
+        return self._issue_tokens(user)
 
     async def create_user(self, data: UserCreate) -> UserOut:
         now = datetime.utcnow()
@@ -124,3 +124,18 @@ class AuthUseCases:
         total = await self.user_repo.count_all()
         items = [UserOut.model_validate(u) for u in users]
         return PaginatedResult.create(items, total, params)
+
+    def _issue_tokens(self, user: User) -> TokenOut:
+        access_token = create_token(
+            sub=str(user.id),
+            email=user.email,
+            roles=[r.name for r in user.roles],
+            expires_delta=timedelta(minutes=settings.jwt_expiration_minutes),
+        )
+        refresh_token = create_token(
+            sub=str(user.id),
+            email=user.email,
+            roles=[r.name for r in user.roles],
+            expires_delta=timedelta(days=settings.jwt_refresh_expiration_days),
+        )
+        return TokenOut(access_token=access_token, refresh_token=refresh_token)

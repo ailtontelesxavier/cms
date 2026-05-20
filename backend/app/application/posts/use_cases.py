@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from app.application.posts.ports import PostContentRepository, PostRepository
-from app.application.posts.schemas import PostCreate, PostOut, PostUpdate
+from app.application.posts.schemas import PostCreate, PostDetailOut, PostOut, PostUpdate
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.domain.posts.entities import Post
 from app.domain.posts.exceptions import (
@@ -65,6 +65,26 @@ class PostUseCases:
         if not post:
             raise PostNotFoundError(str(post_id))
         return PostOut.model_validate(post)
+
+    async def get_detail_by_id(self, post_id: UUID) -> PostDetailOut:
+        post = await self.post_repo.get_by_id(post_id)
+        if not post:
+            raise PostNotFoundError(str(post_id))
+
+        content_data = await self.content_repo.get(post.mongo_object_id)
+        content = None
+        if content_data:
+            from app.application.posts.schemas import PostContentOut
+            content = PostContentOut(
+                html=content_data.get("html", ""),
+                plain_text=content_data.get("plain_text", ""),
+                summary=content_data.get("summary", ""),
+                cover_image=content_data.get("cover_image"),
+                images=content_data.get("images", []),
+            )
+
+        post_out = PostOut.model_validate(post)
+        return PostDetailOut(**post_out.model_dump(), content=content)
 
     async def get_by_slug(self, slug: str) -> PostOut:
         post = await self.post_repo.get_by_slug(slug)

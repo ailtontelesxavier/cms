@@ -11,6 +11,7 @@ class LoginRequest(BaseModel):
 
 class TokenOut(BaseModel):
     access_token: str
+    refresh_token: str | None = None
     token_type: str = "bearer"
 
 
@@ -18,13 +19,19 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class MFAVerifyRequest(BaseModel):
+    token: str = Field(..., min_length=6, max_length=6)
+
+
+class MFAChallengeRequest(BaseModel):
+    email: str = Field(..., max_length=255)
+    password: str = Field(..., min_length=1)
+    totp: str = Field(..., min_length=6, max_length=6)
+
+
 class MFASetupOut(BaseModel):
     secret: str
     qrcode: str
-
-
-class MFAVerifyRequest(BaseModel):
-    token: str = Field(..., min_length=6, max_length=6)
 
 
 class UserCreate(BaseModel):

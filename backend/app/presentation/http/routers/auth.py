@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.application.auth.schemas import (
     LoginRequest,
+    MFAChallengeRequest,
     MFASetupOut,
     MFAVerifyRequest,
     RefreshRequest,
@@ -28,6 +29,14 @@ async def refresh(
     use_cases: AuthUseCases = Depends(get_auth_use_cases),
 ) -> TokenOut:
     return await use_cases.refresh(data.refresh_token)
+
+
+@router.post("/mfa/challenge")
+async def mfa_challenge(
+    data: MFAChallengeRequest,
+    use_cases: AuthUseCases = Depends(get_auth_use_cases),
+) -> TokenOut:
+    return await use_cases.mfa_challenge(data)
 
 
 @router.post("/mfa/setup")

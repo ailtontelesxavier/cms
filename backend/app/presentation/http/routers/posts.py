@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.application.posts.schemas import PostCreate, PostOut, PostUpdate
+from app.application.posts.schemas import PostCreate, PostDetailOut, PostOut, PostUpdate
 from app.application.posts.use_cases import PostUseCases
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.domain.auth.entities import User
@@ -48,6 +48,14 @@ async def get_post(
     use_cases: PostUseCases = Depends(get_post_use_cases),
 ) -> PostOut:
     return await use_cases.get_by_id(post_id)
+
+
+@router.get("/{post_id}/detail")
+async def get_post_detail(
+    post_id: UUID,
+    use_cases: PostUseCases = Depends(get_post_use_cases),
+) -> PostDetailOut:
+    return await use_cases.get_detail_by_id(post_id)
 
 
 @router.patch("/{post_id}")
