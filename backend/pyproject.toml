@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "cms-backend"
+version = "0.1.0"
+description = "CMS Backend with FastAPI and Hexagonal Architecture"
+authors = ["dev"]
+packages = [{ include = "app" }, { include = "tests" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115"
+uvicorn = { version = "^0.32", extras = ["standard"] }
+pydantic = "^2.10"
+pydantic-settings = "^2.6"
+sqlalchemy = { version = "^2.0", extras = ["asyncio"] }
+asyncpg = "^0.30"
+alembic = "^1.14"
+motor = "^3.6"
+redis = "^5.2"
+arq = "^0.26"
+minio = "^7.2"
+pyjwt = "^2.10"
+pwdlib = { version = "^0.2", extras = ["argon2"] }
+pyotp = "^2.9"
+qrcode = { version = "^7.4", extras = ["pil"] }
+slowapi = "^0.1"
+python-magic = "^0.4"
+python-multipart = "^0.0"
+loguru = "^0.7"
+python-slugify = "^8.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+pytest-asyncio = "^0.24"
+pytest-cov = "^6.0"
+factory-boy = "^3.3"
+freezegun = "^1.5"
+ruff = "^0.7"
+httpx = "^0.28"
+typos = "^1.29"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+ignore = ["B008", "E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
