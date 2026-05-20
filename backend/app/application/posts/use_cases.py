@@ -1,6 +1,8 @@
 from datetime import datetime
 from uuid import UUID
 
+from slugify import slugify
+
 from app.application.posts.ports import PostContentRepository, PostRepository
 from app.application.posts.schemas import PostCreate, PostDetailOut, PostOut, PostUpdate
 from app.core.pagination import PaginatedParams, PaginatedResult
@@ -9,7 +11,6 @@ from app.domain.posts.exceptions import (
     InvalidStatusTransitionError,
     PostContentMissingError,
     PostNotFoundError,
-    PostSlugDuplicateError,
 )
 
 ALLOWED_TRANSITIONS = {
@@ -26,9 +27,12 @@ class PostUseCases:
         self.content_repo = content_repo
 
     async def create(self, data: PostCreate, author_id: UUID) -> PostOut:
-        existing = await self.post_repo.get_by_slug(data.slug)
-        if existing:
-            raise PostSlugDuplicateError(data.slug)
+        slug = data.slug or slugify(data.title)
+        base_slug = slug
+        counter = 1
+        while await self.post_repo.get_by_slug(slug):
+            slug = f"{base_slug}-{counter}"
+            counter += 1
 
         mongo_id = await self.content_repo.create(
             post_ref_id="",
@@ -39,7 +43,7 @@ class PostUseCases:
         now = datetime.utcnow()
         post = Post(
             title=data.title,
-            slug=data.slug,
+            slug=slug,
             author_id=author_id,
             mongo_object_id=str(mongo_id),
             status="draft",

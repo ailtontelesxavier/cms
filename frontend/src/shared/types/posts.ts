@@ -28,7 +28,7 @@ export interface PostDetail extends Post {
 
 export interface PostCreate {
   title: string
-  slug: string
+  slug?: string
   html: string
   summary?: string
   tag_ids?: number[]

@@ -6,6 +6,7 @@ import { tagsApi } from '@/shared/api/tags'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.vue'
 import EmptyState from '@/shared/ui/EmptyState.vue'
 import ApiError from '@/shared/ui/ApiError.vue'
+import PaginationFooter from '@/shared/ui/PaginationFooter.vue'
 import { getApiErrorMessage } from '@/shared/api/client'
 
 const router = useRouter()
@@ -86,19 +87,11 @@ onMounted(loadTags)
         </tbody>
       </table>
 
-      <div v-if="total > 20" class="flex items-center justify-between border-t border-gray-200 px-6 py-3">
-        <span class="text-sm text-gray-600">{{ total }} tag(s)</span>
-        <div class="flex gap-2">
-          <button :disabled="page <= 1" @click="page--; loadTags()"
-            class="rounded-md border border-gray-300 px-3 py-1 text-sm disabled:opacity-50">
-            Anterior
-          </button>
-          <button :disabled="page * 20 >= total" @click="page++; loadTags()"
-            class="rounded-md border border-gray-300 px-3 py-1 text-sm disabled:opacity-50">
-            Próximo
-          </button>
-        </div>
-      </div>
+      <PaginationFooter
+        :page="page"
+        :total="total"
+        label="tag(s)"
+        @update:page="page = $event; loadTags()" />
     </div>
   </div>
 </template>

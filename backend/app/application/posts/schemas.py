@@ -8,7 +8,7 @@ from app.application.tags.schemas import TagOut
 
 class PostCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
-    slug: str = Field(..., min_length=1, max_length=255)
+    slug: str | None = Field(None, max_length=255)
     html: str = Field(..., min_length=1)
     summary: str = Field(default="", max_length=1000)
     tag_ids: list[int] = Field(default_factory=list)

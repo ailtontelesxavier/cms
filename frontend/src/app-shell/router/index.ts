@@ -73,6 +73,22 @@ const router = createRouter({
           component: () => import('@/content-management/posts/views/PostFormView.vue'),
           props: true,
         },
+        {
+          path: 'users',
+          name: 'users',
+          component: () => import('@/user-management/views/UserListView.vue'),
+        },
+        {
+          path: 'users/new',
+          name: 'user-create',
+          component: () => import('@/user-management/views/UserFormView.vue'),
+        },
+        {
+          path: 'users/:id/edit',
+          name: 'user-edit',
+          component: () => import('@/user-management/views/UserFormView.vue'),
+          props: true,
+        },
       ],
     },
   ],

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from app.application.auth.ports import UserRepository
@@ -10,6 +10,7 @@ from app.application.auth.schemas import (
     TokenOut,
     UserCreate,
     UserOut,
+    UserUpdate,
 )
 from app.core.config import settings
 from app.core.pagination import PaginatedParams, PaginatedResult
@@ -124,6 +125,24 @@ class AuthUseCases:
         total = await self.user_repo.count_all()
         items = [UserOut.model_validate(u) for u in users]
         return PaginatedResult.create(items, total, params)
+
+    async def update_user(self, user_id: UUID, data: UserUpdate) -> UserOut:
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise InvalidCredentialsError()
+        if data.name is not None:
+            user.name = data.name
+        if data.is_active is not None:
+            user.is_active = data.is_active
+        user.updated_at = datetime.utcnow()
+        updated = await self.user_repo.update(user)
+        return UserOut.model_validate(updated)
+
+    async def delete_user(self, user_id: UUID) -> None:
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise InvalidCredentialsError()
+        await self.user_repo.delete(user)
 
     def _issue_tokens(self, user: User) -> TokenOut:
         access_token = create_token(

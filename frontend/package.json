@@ -11,6 +11,13 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@editorjs/code": "^2.9.4",
+    "@editorjs/delimiter": "^1.4.2",
+    "@editorjs/editorjs": "^2.31.6",
+    "@editorjs/header": "^2.8.9",
+    "@editorjs/image": "^2.10.3",
+    "@editorjs/list": "^2.0.9",
+    "@editorjs/quote": "^2.7.6",
     "axios": "^1.16.1",
     "pinia": "^3.0.4",
     "vue": "^3.5.34",

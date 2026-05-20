@@ -5,6 +5,7 @@ import { postsApi } from '@/shared/api/posts'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.vue'
 import { getApiErrorMessage } from '@/shared/api/client'
 import ImageUploader from '@/content-management/images/components/ImageUploader.vue'
+import EditorBlock from '@/content-management/posts/components/EditorBlock.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -24,6 +25,7 @@ const form = ref({
 })
 
 const availableTags = ref<{ id: number; name: string }[]>([])
+const editorRef = ref<InstanceType<typeof EditorBlock>>()
 
 async function loadPost() {
   if (!postId.value) return
@@ -55,6 +57,8 @@ async function handleSubmit() {
   saving.value = true
   errorMsg.value = ''
 
+  await editorRef.value?.handleSave()
+
   try {
     if (isEdit && postId.value) {
       await postsApi.update(postId.value, {
@@ -66,7 +70,6 @@ async function handleSubmit() {
     } else {
       const res = await postsApi.create({
         title: form.value.title,
-        slug: form.value.slug,
         html: form.value.html || '<p></p>',
         summary: form.value.summary,
         tag_ids: form.value.tagIds,
@@ -118,12 +121,6 @@ onMounted(() => {
         </div>
 
         <div>
-          <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
-          <input id="slug" v-model="form.slug" type="text" required maxlength="255"
-            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500" />
-        </div>
-
-        <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
           <div class="flex flex-wrap gap-2">
             <button v-for="tag in availableTags" :key="tag.id" type="button" @click="toggleTag(tag.id)"
@@ -143,9 +140,11 @@ onMounted(() => {
         </div>
 
         <div>
-          <label for="html" class="block text-sm font-medium text-gray-700">Conteúdo HTML</label>
-          <textarea id="html" v-model="form.html" rows="15"
-            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+          <label class="block text-sm font-medium text-gray-700 mb-2">Conteúdo</label>
+          <EditorBlock
+            ref="editorRef"
+            v-model="form.html"
+            :post-id="postId" />
         </div>
 
         <ImageUploader v-if="isEdit && postId" :post-id="postId" />

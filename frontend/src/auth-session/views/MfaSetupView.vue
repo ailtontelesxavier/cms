@@ -65,7 +65,7 @@ async function handleVerify() {
           <h2 class="text-sm font-medium text-gray-700 mb-2">
             1. Escaneie o QR Code com seu aplicativo autenticador
           </h2>
-          <div v-html="qrcodeSvg" class="flex justify-center" />
+          <div v-html="qrcodeSvg" class="flex justify-center [&>svg]:w-48 [&>svg]:h-48" />
         </div>
 
         <div>

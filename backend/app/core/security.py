@@ -46,7 +46,9 @@ def get_totp_uri(secret: str, email: str) -> str:
 
 def generate_qrcode(uri: str) -> str:
     img = qrcode.make(uri, image_factory=qrcode.image.svg.SvgImage)
-    return img.to_string().decode()
+    svg = img.to_string().decode()
+    svg = svg.replace("<svg", '<svg width="200" height="200"', 1)
+    return svg
 
 
 def verify_totp(secret: str, token: str) -> bool:
