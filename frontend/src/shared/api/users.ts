@@ -21,6 +21,10 @@ export const usersApi = {
     return client.patch<User>(`/users/${id}`, data)
   },
 
+  updatePassword(id: string, data: { password: string }) {
+    return client.patch(`/users/${id}/password`, data)
+  },
+
   delete(id: string) {
     return client.delete(`/users/${id}`)
   },

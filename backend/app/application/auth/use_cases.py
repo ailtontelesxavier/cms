@@ -10,6 +10,7 @@ from app.application.auth.schemas import (
     TokenOut,
     UserCreate,
     UserOut,
+    UserPasswordUpdate,
     UserUpdate,
 )
 from app.core.config import settings
@@ -137,6 +138,14 @@ class AuthUseCases:
         user.updated_at = datetime.utcnow()
         updated = await self.user_repo.update(user)
         return UserOut.model_validate(updated)
+
+    async def update_user_password(self, user_id: UUID, data: UserPasswordUpdate) -> None:
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise InvalidCredentialsError()
+        user.hashed_password = hash_password(data.password)
+        user.updated_at = datetime.utcnow()
+        await self.user_repo.update(user)
 
     async def delete_user(self, user_id: UUID) -> None:
         user = await self.user_repo.get_by_id(user_id)

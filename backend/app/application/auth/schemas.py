@@ -57,3 +57,7 @@ class UserOut(BaseModel):
 class UserUpdate(BaseModel):
     name: str | None = None
     is_active: bool | None = None
+
+
+class UserPasswordUpdate(BaseModel):
+    password: str = Field(..., min_length=8)

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.application.auth.schemas import UserCreate, UserOut, UserUpdate
+from app.application.auth.schemas import UserCreate, UserOut, UserPasswordUpdate, UserUpdate
 from app.application.auth.use_cases import AuthUseCases
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.domain.auth.entities import User
@@ -59,6 +59,16 @@ async def update_user(
     use_cases: AuthUseCases = Depends(get_auth_use_cases),
 ) -> UserOut:
     return await use_cases.update_user(user_id, data)
+
+
+@router.patch("/{user_id}/password", status_code=204)
+async def update_user_password(
+    user_id: UUID,
+    data: UserPasswordUpdate,
+    _=Depends(require_permission("auth", "atualizar")),
+    use_cases: AuthUseCases = Depends(get_auth_use_cases),
+) -> None:
+    await use_cases.update_user_password(user_id, data)
 
 
 @router.delete("/{user_id}", status_code=204)
