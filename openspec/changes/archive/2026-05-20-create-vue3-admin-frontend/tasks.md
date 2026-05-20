@@ -32,6 +32,6 @@
 
 ## 6. Validation and delivery
 
-- [ ] 6.1 Run the frontend against the local backend to validate login, tags, posts, publish/archive, and image workflows end to end.
+- [x] 6.1 Run the frontend against the local backend to validate login, tags, posts, publish/archive, and image workflows end to end.
 - [x] 6.2 Add automated frontend tests for the session store, protected routing, and the primary content-management flows.
 - [x] 6.3 Document local setup, required environment variables, and any backend contract assumptions needed to run the admin project.
