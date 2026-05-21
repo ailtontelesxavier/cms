@@ -1,4 +1,5 @@
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -24,6 +25,17 @@ class Settings(BaseSettings):
     minio_bucket: str = "cms-images"
     minio_use_ssl: bool = False
     minio_public_url: str = "http://localhost:9000/cms-images"
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def parse_debug(cls, value: object) -> object:
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"release", "production", "prod"}:
+                return False
+            if normalized in {"debug", "development", "dev"}:
+                return True
+        return value
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 
