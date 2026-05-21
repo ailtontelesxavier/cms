@@ -56,18 +56,22 @@ class PostRepository:
         result = await self.session.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def list_all(self, skip: int = 0, limit: int = 20, status: str | None = None) -> list[PostModel]:
+    async def list_all(self, skip: int = 0, limit: int = 20, status: str | None = None, q: str | None = None) -> list[PostModel]:
         stmt = select(PostModel).options(selectinload(PostModel.tags))
         if status:
             stmt = stmt.where(PostModel.status == status)
+        if q:
+            stmt = stmt.where(PostModel.title.ilike(f'%{q}%'))
         stmt = stmt.order_by(PostModel.created_at.desc()).offset(skip).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.unique().scalars().all())
 
-    async def count_all(self, status: str | None = None) -> int:
+    async def count_all(self, status: str | None = None, q: str | None = None) -> int:
         stmt = select(func.count(PostModel.id))
         if status:
             stmt = stmt.where(PostModel.status == status)
+        if q:
+            stmt = stmt.where(PostModel.title.ilike(f'%{q}%'))
         result = await self.session.execute(stmt)
         return result.scalar_one()
 

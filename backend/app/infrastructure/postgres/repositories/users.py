@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import selectinload
 
 from app.infrastructure.postgres.database import Base
@@ -26,15 +26,24 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def list_all(self, skip: int = 0, limit: int = 20) -> list[User]:
-        stmt = select(User).options(selectinload(User.roles)).offset(skip).limit(limit)
+    async def list_all(self, skip: int = 0, limit: int = 20, q: str | None = None) -> list[User]:
+        stmt = select(User).options(selectinload(User.roles))
+        if q:
+            stmt = stmt.where(
+                or_(User.name.ilike(f'%{q}%'), User.email.ilike(f'%{q}%'))
+            )
+        stmt = stmt.offset(skip).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.unique().scalars().all())
 
-    async def count_all(self) -> int:
-        stmt = select(User)
+    async def count_all(self, q: str | None = None) -> int:
+        stmt = select(func.count(User.id))
+        if q:
+            stmt = stmt.where(
+                or_(User.name.ilike(f'%{q}%'), User.email.ilike(f'%{q}%'))
+            )
         result = await self.session.execute(stmt)
-        return len(result.scalars().all())
+        return result.scalar_one()
 
     async def update(self, user: User) -> User:
         self.session.add(user)

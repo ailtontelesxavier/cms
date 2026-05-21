@@ -26,11 +26,12 @@ async def get_me(
 async def list_users(
     page: int = 1,
     page_size: int = 20,
+    q: str | None = None,
     _=Depends(require_permission("auth", "ler")),
     use_cases: AuthUseCases = Depends(get_auth_use_cases),
 ) -> PaginatedResult[UserOut]:
     params = PaginatedParams(page=page, page_size=page_size)
-    return await use_cases.list_users(params)
+    return await use_cases.list_users(params, q=q)
 
 
 @router.post("", status_code=201)

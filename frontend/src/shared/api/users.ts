@@ -3,9 +3,9 @@ import type { PaginatedResult } from '@/shared/types/api'
 import type { User } from '@/shared/types/auth'
 
 export const usersApi = {
-  list(page = 1, pageSize = 20) {
+  list(page = 1, pageSize = 20, q?: string) {
     return client.get<PaginatedResult<User>>('/users', {
-      params: { page, page_size: pageSize },
+      params: { page, page_size: pageSize, ...(q ? { q } : {}) },
     })
   },
 

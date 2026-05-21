@@ -13,6 +13,7 @@ const router = useRouter()
 const users = ref<User[]>([])
 const total = ref(0)
 const page = ref(1)
+const searchQuery = ref('')
 const loading = ref(true)
 const errorMsg = ref('')
 
@@ -20,7 +21,7 @@ async function loadUsers() {
   loading.value = true
   errorMsg.value = ''
   try {
-    const res = await usersApi.list(page.value, 20)
+    const res = await usersApi.list(page.value, 20, searchQuery.value || undefined)
     users.value = res.data.items
     total.value = res.data.total
   } catch (err) {
@@ -28,6 +29,11 @@ async function loadUsers() {
   } finally {
     loading.value = false
   }
+}
+
+function onSearch() {
+  page.value = 1
+  void loadUsers()
 }
 
 async function handleDelete(user: User) {
@@ -50,6 +56,15 @@ onMounted(loadUsers)
       <button @click="router.push({ name: 'user-create' })"
         class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500">
         Novo Usuário
+      </button>
+    </div>
+
+    <div class="mb-4 flex gap-2">
+      <input v-model="searchQuery" type="text" placeholder="Buscar por nome ou email..." @keyup.enter="onSearch"
+        class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+      <button @click="onSearch"
+        class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500">
+        Buscar
       </button>
     </div>
 

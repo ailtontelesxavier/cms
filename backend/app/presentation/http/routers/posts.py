@@ -19,10 +19,11 @@ async def list_posts(
     page: int = 1,
     page_size: int = 20,
     status: str | None = None,
+    q: str | None = None,
     use_cases: PostUseCases = Depends(get_post_use_cases),
 ) -> PaginatedResult[PostOut]:
     params = PaginatedParams(page=page, page_size=page_size)
-    return await use_cases.list_all(params, status=status)
+    return await use_cases.list_all(params, status=status, q=q)
 
 
 @router.post("", status_code=201)

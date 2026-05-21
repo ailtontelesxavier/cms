@@ -15,6 +15,7 @@ const posts = ref<Post[]>([])
 const total = ref(0)
 const page = ref(1)
 const statusFilter = ref<PostStatus | ''>('')
+const searchQuery = ref('')
 const loading = ref(true)
 const errorMsg = ref('')
 
@@ -34,7 +35,7 @@ async function loadPosts() {
   loading.value = true
   errorMsg.value = ''
   try {
-    const res = await postsApi.list(page.value, 20, statusFilter.value || undefined)
+    const res = await postsApi.list(page.value, 20, statusFilter.value || undefined, searchQuery.value || undefined)
     posts.value = res.data.items
     total.value = res.data.total
   } catch (err) {
@@ -101,6 +102,11 @@ function onStatusChange() {
   void loadPosts()
 }
 
+function onSearch() {
+  page.value = 1
+  void loadPosts()
+}
+
 onMounted(() => void loadPosts())
 </script>
 
@@ -119,6 +125,12 @@ onMounted(() => void loadPosts())
         class="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500">
         <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
       </select>
+      <input v-model="searchQuery" type="text" placeholder="Buscar por título..." @keyup.enter="onSearch"
+        class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500" />
+      <button @click="onSearch"
+        class="rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500">
+        Buscar
+      </button>
     </div>
 
     <LoadingSpinner v-if="loading" />

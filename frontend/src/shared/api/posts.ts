@@ -3,9 +3,9 @@ import type { PaginatedResult } from '@/shared/types/api'
 import type { Post, PostCreate, PostUpdate, ImageUploadResult } from '@/shared/types/posts'
 
 export const postsApi = {
-  list(page = 1, pageSize = 20, status?: string) {
+  list(page = 1, pageSize = 20, status?: string, q?: string) {
     return client.get<PaginatedResult<Post>>('/posts', {
-      params: { page, page_size: pageSize, ...(status ? { status } : {}) },
+      params: { page, page_size: pageSize, ...(status ? { status } : {}), ...(q ? { q } : {}) },
     })
   },
 

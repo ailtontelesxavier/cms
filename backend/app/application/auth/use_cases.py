@@ -121,9 +121,9 @@ class AuthUseCases:
             raise InvalidCredentialsError()
         return UserOut.model_validate(user)
 
-    async def list_users(self, params: PaginatedParams) -> PaginatedResult[UserOut]:
-        users = await self.user_repo.list_all(skip=params.offset, limit=params.limit)
-        total = await self.user_repo.count_all()
+    async def list_users(self, params: PaginatedParams, q: str | None = None) -> PaginatedResult[UserOut]:
+        users = await self.user_repo.list_all(skip=params.offset, limit=params.limit, q=q)
+        total = await self.user_repo.count_all(q=q)
         items = [UserOut.model_validate(u) for u in users]
         return PaginatedResult.create(items, total, params)
 

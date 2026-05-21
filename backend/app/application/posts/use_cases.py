@@ -98,11 +98,11 @@ class PostUseCases:
             raise PostNotFoundError(slug)
         return PostOut.model_validate(post)
 
-    async def list_all(self, params: PaginatedParams, status: str | None = None) -> PaginatedResult[PostOut]:
+    async def list_all(self, params: PaginatedParams, status: str | None = None, q: str | None = None) -> PaginatedResult[PostOut]:
         posts = await self.post_repo.list_all(
-            skip=params.offset, limit=params.limit, status=status
+            skip=params.offset, limit=params.limit, status=status, q=q
         )
-        total = await self.post_repo.count_all(status=status)
+        total = await self.post_repo.count_all(status=status, q=q)
         items = [PostOut.model_validate(p) for p in posts]
         return PaginatedResult.create(items, total, params)
 
