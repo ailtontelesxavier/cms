@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import EditorJS, { type ToolConstructable } from '@editorjs/editorjs'
-import Header from '@editorjs/header'
+import Header from 'editorjs-header-with-alignment'
+import Paragraph from 'editorjs-paragraph-with-alignment'
 import List from '@editorjs/list'
+import Checklist from '@editorjs/checklist'
+import Table from '@editorjs/table'
 import Quote from '@editorjs/quote'
 import CodeTool from '@editorjs/code'
 import Delimiter from '@editorjs/delimiter'
 import ImageTool from '@editorjs/image'
+import LinkTool from '@editorjs/link'
+import Underline from '@editorjs/underline'
+import Marker from '@editorjs/marker'
+import InlineCode from '@editorjs/inline-code'
+import Strikethrough from '@sotaproject/strikethrough'
+import IndentTune from 'editorjs-indent-tune'
 import { postsApi } from '@/shared/api/posts'
 
 const props = defineProps<{
@@ -21,27 +30,181 @@ const emit = defineEmits<{
 const editorRef = ref<HTMLDivElement>()
 const editorInstance = ref<EditorJS>()
 
-type EditorTools = Record<string, { class: ToolConstructable; config?: Record<string, unknown>; inlineToolbar?: boolean }>
+const COLORS = [
+  '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#d9d9d9',
+  '#980000', '#ff0000', '#ff6600', '#ff9900', '#ffff00', '#00b050',
+  '#00ff00', '#00ffff', '#0070c0', '#0000ff', '#7030a0', '#ff00ff',
+]
+
+class TextColor {
+  api: any
+  config: any
+  button: HTMLButtonElement | null = null
+  node: HTMLElement | null = null
+  tag = 'SPAN'
+  _preferredColor: string
+  COLORS: string[]
+
+  static get isInline() {
+    return true
+  }
+
+  static get sanitize() {
+    return {
+      span: {
+        style: true,
+      },
+    }
+  }
+
+  constructor({ api, config }: { api: any; config: any }) {
+    this.api = api
+    this.config = config || {}
+    this.COLORS = config.colors || COLORS
+    this._preferredColor = this.COLORS[0]
+  }
+
+  render() {
+    this.button = document.createElement('button')
+    this.button.type = 'button'
+    this.button.innerHTML = '<span style="text-decoration:underline;font-weight:bold;font-family:serif">A</span>'
+    this.button.classList.add(this.api.styles.inlineToolButton)
+    return this.button
+  }
+
+  surround(range: Range) {
+    if (!range) return
+    const term = range.extractContents()
+    const span = document.createElement(this.tag)
+    span.style.color = this._preferredColor
+    span.appendChild(term)
+    range.insertNode(span)
+    this.api.selection.expandToTag(span)
+  }
+
+  checkState(selection: Selection) {
+    if (!selection) return false
+    const anchor = selection.anchorNode
+    if (!anchor) return false
+    const parent = anchor.nodeType === 3 ? anchor.parentElement : anchor as HTMLElement
+    if (!parent) return false
+    const span = parent.closest(this.tag) as HTMLElement | null
+    if (span && span.style.color) {
+      this.node = span
+      this.button?.classList.add(this.api.styles.inlineToolButtonActive)
+      return true
+    }
+    this.node = null
+    this.button?.classList.remove(this.api.styles.inlineToolButtonActive)
+    return false
+  }
+
+  unwrap(_range: Range) {
+    if (!this.node) return
+    const text = this.node.textContent || ''
+    const parent = this.node.parentNode
+    if (!parent) return
+    parent.replaceChild(document.createTextNode(text), this.node)
+    this.node = null
+  }
+
+  renderActions() {
+    const picker = document.createElement('div')
+    picker.style.cssText = 'display:grid;grid-template-columns:repeat(6,28px);gap:4px;padding:8px;align-items:center'
+
+    this.COLORS.forEach(color => {
+      const swatch = document.createElement('button')
+      swatch.type = 'button'
+      swatch.style.cssText = `width:28px;height:28px;border-radius:50%;background-color:${color};border:2px solid ${color === '#ffffff' || color === '#d9d9d9' ? '#ccc' : color};cursor:pointer`
+      swatch.dataset.color = color
+      swatch.addEventListener('click', () => {
+        this._preferredColor = color
+        if (this.node) {
+          this.node.style.color = color
+        }
+        picker.remove()
+      })
+      picker.appendChild(swatch)
+    })
+
+    return picker
+  }
+}
+
+const inlineToolbar = ['bold', 'italic', 'underline', 'strikethrough', 'marker', 'inlineCode', 'link', 'color']
+
+type EditorTools = Record<string, {
+  class: ToolConstructable | any
+  config?: Record<string, unknown>
+  inlineToolbar?: boolean | string[]
+  tunes?: string[]
+}>
 
 const toolsConfig = computed(() => {
   const tools: EditorTools = {
     header: {
       class: Header,
-      config: { levels: [2, 3, 4], defaultLevel: 2 },
+      config: { levels: [1, 2, 3, 4], defaultLevel: 1 },
+      inlineToolbar,
+      tunes: ['indentTune'],
+    },
+    paragraph: {
+      class: Paragraph,
+      config: { placeholder: 'Comece a escrever...' },
+      inlineToolbar,
+      tunes: ['indentTune'],
     },
     list: {
       class: List,
-      inlineToolbar: true,
+      inlineToolbar,
+      tunes: ['indentTune'],
+    },
+    checklist: {
+      class: Checklist,
+      inlineToolbar,
+      tunes: ['indentTune'],
+    },
+    table: {
+      class: Table,
     },
     quote: {
       class: Quote,
-      inlineToolbar: true,
+      inlineToolbar,
+      tunes: ['indentTune'],
     },
     code: {
       class: CodeTool,
     },
     delimiter: {
       class: Delimiter,
+    },
+    linkTool: {
+      class: LinkTool,
+      config: {
+        endpoint: '',
+      },
+    },
+    underline: {
+      class: Underline,
+    },
+    marker: {
+      class: Marker,
+    },
+    inlineCode: {
+      class: InlineCode,
+    },
+    strikethrough: {
+      class: Strikethrough,
+    },
+    color: {
+      class: TextColor as any,
+      config: { colors: COLORS },
+    },
+    indentTune: {
+      class: IndentTune as any,
+      config: {
+        version: EditorJS.version,
+      },
     },
   }
 
@@ -68,17 +231,21 @@ const toolsConfig = computed(() => {
 async function initEditor() {
   if (!editorRef.value) return
 
-  const blocks = htmlToBlocks(props.modelValue)
+  try {
+    const blocks = htmlToBlocks(props.modelValue)
 
-  const editor = new EditorJS({
-    holder: editorRef.value,
-    data: { blocks },
-    tools: toolsConfig.value,
-    autofocus: true,
-    placeholder: 'Comece a escrever...',
-  })
+    const editor = new EditorJS({
+      holder: editorRef.value,
+      data: { blocks },
+      tools: toolsConfig.value,
+      autofocus: true,
+      placeholder: 'Comece a escrever...',
+    })
 
-  editorInstance.value = editor
+    editorInstance.value = editor
+  } catch {
+    editorInstance.value = undefined
+  }
 }
 
 async function save(): Promise<string> {
@@ -115,13 +282,23 @@ function htmlToBlocks(html: string): { type: string; data: Record<string, unknow
 
     if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
       const level = parseInt(tag[1])
-      blocks.push({ type: 'header', data: { text: el.innerHTML, level } })
+      const align = el.style.textAlign || 'left'
+      blocks.push({ type: 'header', data: { text: el.innerHTML, level, align } })
     } else if (tag === 'p') {
-      blocks.push({ type: 'paragraph', data: { text: el.innerHTML } })
+      const alignment = el.style.textAlign || 'left'
+      blocks.push({ type: 'paragraph', data: { text: el.innerHTML, alignment } })
     } else if (['ul', 'ol'].includes(tag)) {
       const items: string[] = []
       el.querySelectorAll('li').forEach(li => items.push(li.innerHTML))
       blocks.push({ type: 'list', data: { style: tag === 'ul' ? 'unordered' : 'ordered', items } })
+    } else if (tag === 'table') {
+      const content: string[][] = []
+      el.querySelectorAll('tr').forEach(tr => {
+        const row: string[] = []
+        tr.querySelectorAll('td, th').forEach(cell => row.push(cell.innerHTML))
+        content.push(row)
+      })
+      blocks.push({ type: 'table', data: { content, withHeadings: false } })
     } else if (tag === 'blockquote') {
       blocks.push({ type: 'quote', data: { text: el.innerHTML, caption: '', alignment: 'left' } })
     } else if (tag === 'pre') {
@@ -142,18 +319,34 @@ function blocksToHtml(blocks: { type: string; data: Record<string, unknown> }[])
   return blocks.map(block => {
     switch (block.type) {
       case 'header': {
-        const d = block.data as { text?: string; level?: number }
-        return `<h${d.level || 2}>${d.text || ''}</h${d.level || 2}>`
+        const d = block.data as { text?: string; level?: number; align?: string }
+        const alignStyle = d.align && d.align !== 'left' ? ` style="text-align:${d.align}"` : ''
+        return `<h${d.level || 2}${alignStyle}>${d.text || ''}</h${d.level || 2}>`
       }
       case 'paragraph': {
-        const d = block.data as { text?: string }
-        return `<p>${d.text || ''}</p>`
+        const d = block.data as { text?: string; alignment?: string }
+        const alignStyle = d.alignment && d.alignment !== 'left' ? ` style="text-align:${d.alignment}"` : ''
+        return `<p${alignStyle}>${d.text || ''}</p>`
       }
       case 'list': {
         const d = block.data as { style?: string; items?: string[] }
         const tag = d.style === 'ordered' ? 'ol' : 'ul'
         const items = (d.items || []).map(item => `<li>${item}</li>`).join('')
         return `<${tag}>${items}</${tag}>`
+      }
+      case 'checklist': {
+        const d = block.data as { items?: { text: string; checked: boolean }[] }
+        const items = (d.items || []).map(item =>
+          `<li>${item.checked ? '<input type="checkbox" checked disabled>' : '<input type="checkbox" disabled>'} ${item.text}</li>`
+        ).join('')
+        return `<ul data-type="checklist">${items}</ul>`
+      }
+      case 'table': {
+        const d = block.data as { content?: string[][]; withHeadings?: boolean }
+        const rows = (d.content || []).map(row =>
+          `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
+        ).join('')
+        return `<table><tbody>${rows}</tbody></table>`
       }
       case 'quote': {
         const d = block.data as { text?: string; caption?: string }
@@ -189,14 +382,17 @@ async function handleSave() {
 watch(() => props.postId, () => {
   if (editorInstance.value) {
     editorInstance.value.destroy()
-    initEditor()
+    editorInstance.value = undefined
   }
+  initEditor()
 })
 
 onMounted(initEditor)
 
 onBeforeUnmount(() => {
-  editorInstance.value?.destroy()
+  if (editorInstance.value && typeof editorInstance.value.destroy === 'function') {
+    editorInstance.value.destroy()
+  }
 })
 
 defineExpose({ save, handleSave })
