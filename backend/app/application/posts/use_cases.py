@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from slugify import slugify
 
@@ -34,18 +34,14 @@ class PostUseCases:
             slug = f"{base_slug}-{counter}"
             counter += 1
 
-        mongo_id = await self.content_repo.create(
-            post_ref_id="",
-            html=data.html,
-            summary=data.summary,
-        )
-
         now = datetime.utcnow()
+        mongo_ref_id = str(uuid4())
+
         post = Post(
             title=data.title,
             slug=slug,
             author_id=author_id,
-            mongo_object_id=str(mongo_id),
+            mongo_object_id=mongo_ref_id,
             status="draft",
             created_at=now,
             updated_at=now,
@@ -54,12 +50,18 @@ class PostUseCases:
 
         try:
             created = await self.post_repo.create(post)
-            await self.content_repo.update(
-                str(mongo_id),
-                {"post_ref_id": str(created.id)},
+        except Exception:
+            raise
+
+        try:
+            await self.content_repo.create(
+                post_ref_id=str(created.id),
+                html=data.html,
+                summary=data.summary,
+                document_id=mongo_ref_id,
             )
         except Exception:
-            await self.content_repo.delete(str(mongo_id))
+            await self.post_repo.delete(created)
             raise
 
         return PostOut.model_validate(created)
