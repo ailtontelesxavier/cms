@@ -12,6 +12,17 @@ interface SessionData {
   user: User
 }
 
+function getErrorDetail(err: unknown): string | undefined {
+  const responseDetail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail
+  if (typeof responseDetail === 'string') return responseDetail
+  if (err instanceof Error) return err.message
+  return undefined
+}
+
+function isMfaRequiredError(err: unknown): boolean {
+  return getErrorDetail(err)?.includes('auth:mfa_required') ?? false
+}
+
 export const useSessionStore = defineStore('session', () => {
   const accessToken = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
@@ -59,8 +70,8 @@ export const useSessionStore = defineStore('session', () => {
       persistSession(access_token, user, refresh_token)
       return user
     } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-      if (detail === 'auth:mfa_required') {
+      const detail = getErrorDetail(err)
+      if (isMfaRequiredError(err)) {
         throw new MfaRequiredError(email, password)
       }
       error.value = detail || 'Falha na autenticação'

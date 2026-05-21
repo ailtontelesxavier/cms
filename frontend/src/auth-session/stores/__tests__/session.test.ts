@@ -75,6 +75,15 @@ describe('useSessionStore', () => {
       expect(store.isAuthenticated).toBe(false)
     })
 
+    it('throws MfaRequiredError when backend prefixes mfa_required detail', async () => {
+      const error = { response: { data: { detail: 'Permission denied: auth:mfa_required' } } }
+      vi.mocked(authApi.login).mockRejectedValue(error)
+
+      const store = useSessionStore()
+      await expect(store.login('admin@test.com', 'password')).rejects.toThrow(MfaRequiredError)
+      expect(store.isAuthenticated).toBe(false)
+    })
+
     it('sets error on failed login', async () => {
       const error = { response: { data: { detail: 'Invalid credentials' } } }
       vi.mocked(authApi.login).mockRejectedValue(error)
