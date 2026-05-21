@@ -7,6 +7,7 @@ import LoadingSpinner from '@/shared/ui/LoadingSpinner.vue'
 import EmptyState from '@/shared/ui/EmptyState.vue'
 import ApiError from '@/shared/ui/ApiError.vue'
 import PaginationFooter from '@/shared/ui/PaginationFooter.vue'
+import ConfirmDialog from '@/shared/ui/ConfirmDialog.vue'
 import { getApiErrorMessage } from '@/shared/api/client'
 
 const router = useRouter()
@@ -43,40 +44,64 @@ async function loadPosts() {
   }
 }
 
-async function handlePublish(post: Post) {
-  try {
-    await postsApi.publish(post.id)
-    await loadPosts()
-  } catch (err) {
-    alert(getApiErrorMessage(err))
+const dialog = ref({
+  open: false,
+  title: '',
+  message: '',
+  confirmLabel: '',
+  confirmClass: '',
+  action: '' as 'publish' | 'archive' | 'delete',
+  post: null as Post | null,
+  loading: false,
+})
+
+function openDialog(action: 'publish' | 'archive' | 'delete', post: Post) {
+  const config = {
+    publish: { title: 'Publicar Post', confirmLabel: 'Publicar', confirmClass: 'rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-500 disabled:opacity-50' },
+    archive: { title: 'Arquivar Post', confirmLabel: 'Arquivar', confirmClass: 'rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50' },
+    delete: { title: 'Excluir Post', confirmLabel: 'Excluir', confirmClass: 'rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 disabled:opacity-50' },
+  }
+  const c = config[action]
+  dialog.value = {
+    open: true,
+    title: c.title,
+    message: action === 'delete'
+      ? `Excluir o post "${post.title}"? Esta ação não pode ser desfeita.`
+      : `${c.title} "${post.title}"?`,
+    confirmLabel: c.confirmLabel,
+    confirmClass: c.confirmClass,
+    action,
+    post,
+    loading: false,
   }
 }
 
-async function handleArchive(post: Post) {
+async function handleConfirm() {
+  if (!dialog.value.post) return
+  dialog.value.loading = true
   try {
-    await postsApi.archive(post.id)
+    if (dialog.value.action === 'publish') {
+      await postsApi.publish(dialog.value.post.id)
+    } else if (dialog.value.action === 'archive') {
+      await postsApi.archive(dialog.value.post.id)
+    } else if (dialog.value.action === 'delete') {
+      await postsApi.delete(dialog.value.post.id)
+    }
+    dialog.value.open = false
     await loadPosts()
   } catch (err) {
-    alert(getApiErrorMessage(err))
-  }
-}
-
-async function handleDelete(post: Post) {
-  if (!confirm(`Excluir o post "${post.title}"?`)) return
-  try {
-    await postsApi.delete(post.id)
-    await loadPosts()
-  } catch (err) {
+    dialog.value.loading = false
+    dialog.value.open = false
     alert(getApiErrorMessage(err))
   }
 }
 
 function onStatusChange() {
   page.value = 1
-  loadPosts()
+  void loadPosts()
 }
 
-onMounted(loadPosts)
+onMounted(() => void loadPosts())
 </script>
 
 <template>
@@ -138,14 +163,14 @@ onMounted(loadPosts)
                 Editar
               </button>
               <button v-if="post.status === 'draft' || post.status === 'review'"
-                @click="handlePublish(post)" class="text-green-600 hover:text-green-500 mr-2">
+                @click="openDialog('publish', post)" class="text-green-600 hover:text-green-500 mr-2">
                 Publicar
               </button>
               <button v-if="post.status !== 'archived'"
-                @click="handleArchive(post)" class="text-amber-600 hover:text-amber-500 mr-2">
+                @click="openDialog('archive', post)" class="text-amber-600 hover:text-amber-500 mr-2">
                 Arquivar
               </button>
-              <button @click="handleDelete(post)" class="text-red-600 hover:text-red-500">
+              <button @click="openDialog('delete', post)" class="text-red-600 hover:text-red-500">
                 Excluir
               </button>
             </td>
@@ -159,5 +184,16 @@ onMounted(loadPosts)
         label="post(s)"
         @update:page="page = $event; loadPosts()" />
     </div>
+
+    <ConfirmDialog
+      :open="dialog.open"
+      :title="dialog.title"
+      :message="dialog.message"
+      :confirm-label="dialog.confirmLabel"
+      :confirm-class="dialog.confirmClass"
+      :loading="dialog.loading"
+      @confirm="handleConfirm"
+      @cancel="dialog.open = false"
+    />
   </div>
 </template>
