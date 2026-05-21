@@ -419,7 +419,7 @@ defineExpose({ save, handleSave })
 
 <template>
   <div>
-    <div ref="editorRef" class="editor-wrapper rounded-md border border-gray-300 px-3 py-2" />
+    <div ref="editorRef" class="prose prose-sm max-w-none rounded-md border border-gray-300 px-3 py-2" />
     <button type="button" @click="handleSave"
       class="mt-2 rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-500">
       Sincronizar editor
@@ -428,31 +428,7 @@ defineExpose({ save, handleSave })
 </template>
 
 <style scoped>
-.editor-wrapper :deep(.ce-header) {
+.prose :deep(.ce-header) {
   font-weight: 700;
-}
-
-.editor-wrapper :deep(h1.ce-header) {
-  font-size: 2em;
-  line-height: 1.2;
-  margin: 0.67em 0;
-}
-
-.editor-wrapper :deep(h2.ce-header) {
-  font-size: 1.5em;
-  line-height: 1.3;
-  margin: 0.83em 0;
-}
-
-.editor-wrapper :deep(h3.ce-header) {
-  font-size: 1.17em;
-  line-height: 1.4;
-  margin: 1em 0;
-}
-
-.editor-wrapper :deep(h4.ce-header) {
-  font-size: 1em;
-  line-height: 1.5;
-  margin: 1.33em 0;
 }
 </style>
