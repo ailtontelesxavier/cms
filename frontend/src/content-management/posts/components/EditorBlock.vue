@@ -16,7 +16,10 @@ import Marker from '@editorjs/marker'
 import InlineCode from '@editorjs/inline-code'
 import Strikethrough from '@sotaproject/strikethrough'
 import IndentTune from 'editorjs-indent-tune'
+import 'editorjs-font-size-plugin'
 import { postsApi } from '@/shared/api/posts'
+
+const FontSizeTool = (window as any).FontSizeTool
 
 const props = defineProps<{
   modelValue: string
@@ -131,7 +134,7 @@ class TextColor {
   }
 }
 
-const inlineToolbar = ['bold', 'italic', 'underline', 'strikethrough', 'marker', 'inlineCode', 'link', 'color']
+const inlineToolbar = ['bold', 'italic', 'underline', 'strikethrough', 'marker', 'inlineCode', 'link', 'color', 'fontSize']
 
 type EditorTools = Record<string, {
   class: ToolConstructable | any
@@ -199,6 +202,22 @@ const toolsConfig = computed(() => {
     color: {
       class: TextColor as any,
       config: { colors: COLORS },
+    },
+    fontSize: {
+      class: FontSizeTool as any,
+      config: {
+        fontSizes: [
+          { size: '12px', label: 'Pequeno' },
+          { size: '14px', label: 'Normal' },
+          { size: '16px', label: 'Médio' },
+          { size: '18px', label: 'Grande' },
+          { size: '20px', label: 'Extra Grande' },
+          { size: '24px', label: 'XXG' },
+          { size: '28px', label: 'XXXG' },
+          { size: '32px', label: 'Enorme' },
+        ],
+        defaultSize: '14px',
+      },
     },
     indentTune: {
       class: IndentTune as any,
@@ -400,10 +419,40 @@ defineExpose({ save, handleSave })
 
 <template>
   <div>
-    <div ref="editorRef" class="prose prose-sm max-w-none rounded-md border border-gray-300 px-3 py-2" />
+    <div ref="editorRef" class="editor-wrapper rounded-md border border-gray-300 px-3 py-2" />
     <button type="button" @click="handleSave"
       class="mt-2 rounded-md bg-sky-600 px-3 py-1 text-xs font-medium text-white hover:bg-sky-500">
       Sincronizar editor
     </button>
   </div>
 </template>
+
+<style scoped>
+.editor-wrapper :deep(.ce-header) {
+  font-weight: 700;
+}
+
+.editor-wrapper :deep(h1.ce-header) {
+  font-size: 2em;
+  line-height: 1.2;
+  margin: 0.67em 0;
+}
+
+.editor-wrapper :deep(h2.ce-header) {
+  font-size: 1.5em;
+  line-height: 1.3;
+  margin: 0.83em 0;
+}
+
+.editor-wrapper :deep(h3.ce-header) {
+  font-size: 1.17em;
+  line-height: 1.4;
+  margin: 1em 0;
+}
+
+.editor-wrapper :deep(h4.ce-header) {
+  font-size: 1em;
+  line-height: 1.5;
+  margin: 1.33em 0;
+}
+</style>

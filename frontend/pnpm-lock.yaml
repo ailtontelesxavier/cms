@@ -50,6 +50,9 @@ importers:
       axios:
         specifier: ^1.16.1
         version: 1.16.1
+      editorjs-font-size-plugin:
+        specifier: ^2.1.1
+        version: 2.1.1
       editorjs-header-with-alignment:
         specifier: ^1.0.1
         version: 1.0.1
@@ -755,6 +758,9 @@ packages:
     resolution: {integrity: sha512-e0GOtq/aTQhVdNyDU9e02+wz9oDDM+SIOQxWME2QRjzRX5yyLAuHDE+0aE8vHb9XRC8XD37eO2u57+F09JqFhw==}
     engines: {node: '>=14'}
     hasBin: true
+
+  editorjs-font-size-plugin@2.1.1:
+    resolution: {integrity: sha512-bND4Zf9uWp2pxYhghXjsQ/8mRIRQG+FffCGnPxzXo8BPtgO2udmaTKnjjT7Sh0AvIXk4Z1KTO1P5+b5ILmAQzw==}
 
   editorjs-header-with-alignment@1.0.1:
     resolution: {integrity: sha512-L7cDSx/H3wgb9dg05HH9xPMotj3tkoElTd0TeY81pxvO0+tPV+yRZ9hV7fUyZolYUObKfYL9QS+yeTY/YCht5g==}
@@ -2018,6 +2024,8 @@ snapshots:
       commander: 10.0.1
       minimatch: 9.0.9
       semver: 7.8.0
+
+  editorjs-font-size-plugin@2.1.1: {}
 
   editorjs-header-with-alignment@1.0.1: {}
 

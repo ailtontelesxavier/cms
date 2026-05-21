@@ -122,3 +122,24 @@ src/
 ### Paginação
 
 Todas as listagens retornam `{ items: [], total: number, page: number, page_size: number, pages: number }`.
+
+
+
+##editorjs
+plugins editorjs:
+Plugins instalados (10 novos):
+- editorjs-header-with-alignment — cabeçalhos com alinhamento (substitui @editorjs/header)
+- editorjs-paragraph-with-alignment — parágrafo com alinhamento
+- @editorjs/checklist — checklist
+- @editorjs/table — tabelas
+- @editorjs/link — link bookmark
+- @editorjs/underline — sublinhado (inline)
+- @editorjs/marker — marcador/highlight (inline)
+- @editorjs/inline-code — código inline (inline)
+- @sotaproject/strikethrough — tachado (inline)
+- editorjs-indent-tune — indentação nos blocos
+- editorjs-font-size - Configurar tool com sizes customizáveis
+Custom TextColor:
+- Ferramenta inline com 18 cores em seletor circular, definida diretamente no EditorBlock.vue
+Inline toolbar global: ['bold', 'italic', 'underline', 'strikethrough', 'marker', 'inlineCode', 'link', 'color']
+htmlToBlocks/blocksToHtml atualizados para suportar checklist, table, e alinhamento em header/paragraph.

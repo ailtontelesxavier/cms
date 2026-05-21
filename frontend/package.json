@@ -25,6 +25,7 @@
     "@editorjs/underline": "^1.2.1",
     "@sotaproject/strikethrough": "^1.0.1",
     "axios": "^1.16.1",
+    "editorjs-font-size-plugin": "^2.1.1",
     "editorjs-header-with-alignment": "^1.0.1",
     "editorjs-indent-tune": "^1.4.4",
     "editorjs-paragraph-with-alignment": "^3.0.0",

@@ -52,6 +52,11 @@ declare module '@sotaproject/strikethrough' {
   export default Strikethrough
 }
 
+declare module 'editorjs-font-size-plugin' {
+  const FontSizeTool: any
+  export default FontSizeTool
+}
+
 declare module 'editorjs-indent-tune' {
   import type { ToolConstructable } from '@editorjs/editorjs'
   const IndentTune: ToolConstructable & { version: string }
