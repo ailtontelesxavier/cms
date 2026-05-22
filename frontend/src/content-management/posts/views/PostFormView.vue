@@ -31,12 +31,13 @@ async function loadPost() {
   if (!postId.value) return
   loading.value = true
   try {
-    const res = await postsApi.getById(postId.value)
+    const res = await postsApi.getPostDetail(postId.value)
     const post = res.data
     form.value.title = post.title
     form.value.slug = post.slug
     form.value.tagIds = post.tags.map(t => t.id)
-    form.value.summary = ''
+    form.value.summary = post?.content?.summary || ''
+    form.value.html = post?.content?.html || ''
   } catch (err) {
     errorMsg.value = getApiErrorMessage(err)
   } finally {

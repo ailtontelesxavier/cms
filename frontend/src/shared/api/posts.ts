@@ -13,6 +13,10 @@ export const postsApi = {
     return client.get<Post>(`/posts/${id}`)
   },
 
+  getPostDetail(id: string) {
+    return client.get<Post>(`/posts/${id}/detail`)
+  },
+
   create(data: PostCreate) {
     return client.post<Post>('/posts', data)
   },
