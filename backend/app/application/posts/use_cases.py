@@ -67,11 +67,11 @@ class PostUseCases:
 
         return PostOut.model_validate(created)
 
-    async def get_by_id(self, post_id: UUID) -> PostOut:
+    async def get_by_id(self, post_id: UUID) -> PostDetailOut:
         post = await self.post_repo.get_by_id(post_id)
         if not post:
             raise PostNotFoundError(str(post_id))
-        return PostOut.model_validate(post)
+        return PostDetailOut.model_validate(post)
 
     async def get_detail_by_id(self, post_id: UUID) -> PostDetailOut:
         post = await self.post_repo.get_by_id(post_id)

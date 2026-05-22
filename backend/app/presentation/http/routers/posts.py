@@ -47,7 +47,7 @@ async def get_post_by_slug(
 async def get_post(
     post_id: UUID,
     use_cases: PostUseCases = Depends(get_post_use_cases),
-) -> PostOut:
+) -> PostDetailOut:
     return await use_cases.get_by_id(post_id)
 
 
