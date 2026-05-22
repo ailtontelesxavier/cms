@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { rolesApi } from '@/shared/api/roles'
 import { usersApi } from '@/shared/api/users'
+import type { Role } from '@/shared/types/roles'
 import LoadingSpinner from '@/shared/ui/LoadingSpinner.vue'
 import DialogModal from '@/shared/ui/DialogModal.vue'
 import { getApiErrorMessage } from '@/shared/api/client'
@@ -39,6 +41,14 @@ const verificationCode = ref('')
 const isVerifying = ref(false)
 const needsSetup = ref(false)
 const mfaSetupDone = ref(false)
+
+const showRolesDialog = ref(false)
+const allRoles = ref<Role[]>([])
+const selectedRoleIds = ref<number[]>([])
+const rolesLoading = ref(false)
+const rolesSaving = ref(false)
+const rolesError = ref('')
+const rolesSuccess = ref('')
 
 async function loadUser() {
   if (!route.params.id) return
@@ -180,6 +190,63 @@ function closeMfaDialog() {
   mfaError.value = ''
 }
 
+async function openRolesDialog() {
+  showRolesDialog.value = true
+  rolesLoading.value = true
+  rolesError.value = ''
+  rolesSuccess.value = ''
+
+  try {
+    const [rolesRes, userRes] = await Promise.all([
+      rolesApi.list(),
+      usersApi.getById(route.params.id as string),
+    ])
+    allRoles.value = rolesRes.data
+    const userRoles: string[] = userRes.data.roles
+    selectedRoleIds.value = allRoles.value
+      .filter(r => userRoles.includes(r.name))
+      .map(r => r.id)
+  } catch (err) {
+    rolesError.value = getApiErrorMessage(err)
+  } finally {
+    rolesLoading.value = false
+  }
+}
+
+function toggleRole(roleId: number) {
+  const idx = selectedRoleIds.value.indexOf(roleId)
+  if (idx >= 0) {
+    selectedRoleIds.value.splice(idx, 1)
+  } else {
+    selectedRoleIds.value.push(roleId)
+  }
+}
+
+async function handleSaveRoles() {
+  rolesSaving.value = true
+  rolesError.value = ''
+  rolesSuccess.value = ''
+
+  try {
+    await usersApi.assignRoles(route.params.id as string, { role_ids: selectedRoleIds.value })
+    rolesSuccess.value = 'Perfis atualizados com sucesso!'
+    setTimeout(() => {
+      showRolesDialog.value = false
+      rolesSuccess.value = ''
+    }, 1500)
+  } catch (err) {
+    rolesError.value = getApiErrorMessage(err)
+  } finally {
+    rolesSaving.value = false
+  }
+}
+
+function closeRolesDialog() {
+  showRolesDialog.value = false
+  rolesError.value = ''
+  rolesSuccess.value = ''
+}
+
 onMounted(loadUser)
 </script>
 
@@ -232,6 +299,10 @@ onMounted(loadUser)
           <button type="button" @click="openMfaDialog"
             class="rounded-md border border-sky-300 px-4 py-2 text-sm font-medium text-sky-700 hover:bg-sky-50">
             MFA QR Code
+          </button>
+          <button type="button" @click="openRolesDialog"
+            class="rounded-md border border-indigo-300 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50">
+            Perfis
           </button>
         </div>
 
@@ -344,6 +415,54 @@ onMounted(loadUser)
             <div v-if="mfaEnabled" class="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
               MFA ativado
             </div>
+          </div>
+        </template>
+      </div>
+    </DialogModal>
+
+    <DialogModal :open="showRolesDialog" title="Perfis do Usuário" @close="closeRolesDialog">
+      <div class="space-y-4">
+        <LoadingSpinner v-if="rolesLoading" message="Carregando..." />
+        <template v-else>
+          <div v-if="rolesError"
+            class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {{ rolesError }}
+          </div>
+          <div v-if="rolesSuccess"
+            class="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700">
+            {{ rolesSuccess }}
+          </div>
+
+          <p class="text-sm text-gray-600">
+            Selecione os perfis para este usuário:
+          </p>
+
+          <div v-if="allRoles.length === 0" class="text-sm text-gray-400 italic">
+            Nenhum perfil disponível
+          </div>
+
+          <div v-else class="space-y-2 max-h-64 overflow-y-auto">
+            <label v-for="role in allRoles" :key="role.id"
+              class="flex items-center gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 cursor-pointer">
+              <input type="checkbox" :checked="selectedRoleIds.includes(role.id)"
+                @change="toggleRole(role.id)"
+                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+              <div>
+                <span class="text-sm font-medium text-gray-900">{{ role.name }}</span>
+                <p v-if="role.description" class="text-xs text-gray-500">{{ role.description }}</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button @click="handleSaveRoles" :disabled="rolesSaving"
+              class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50">
+              {{ rolesSaving ? 'Salvando...' : 'Salvar' }}
+            </button>
+            <button type="button" @click="closeRolesDialog"
+              class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              Cancelar
+            </button>
           </div>
         </template>
       </div>

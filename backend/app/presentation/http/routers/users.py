@@ -2,13 +2,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.application.auth.schemas import MfaInfoOut, MFASetupOut, MFAVerifyRequest, UserCreate, UserOut, UserPasswordUpdate, UserUpdate
+from app.application.auth.role_use_cases import RoleUseCases
+from app.application.auth.schemas import MfaInfoOut, MFASetupOut, MFAVerifyRequest, UserCreate, UserOut, UserPasswordUpdate, UserRoleAssign, UserUpdate
 from app.application.auth.use_cases import AuthUseCases
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.domain.auth.entities import User
+from app.domain.auth.permissions import Acao, Modulo
 from app.presentation.http.dependencies import (
     get_auth_use_cases,
     get_current_user,
+    get_role_use_cases,
     require_permission,
 )
 
@@ -107,3 +110,13 @@ async def delete_user(
     use_cases: AuthUseCases = Depends(get_auth_use_cases),
 ) -> None:
     await use_cases.delete_user(user_id)
+
+
+@router.put("/{user_id}/roles", status_code=204)
+async def assign_user_roles(
+    user_id: UUID,
+    data: UserRoleAssign,
+    _=Depends(require_permission(Modulo.ADMINISTRATIVO.value, Acao.ADMINISTRAR.value)),
+    use_cases: RoleUseCases = Depends(get_role_use_cases),
+) -> None:
+    await use_cases.assign_roles_to_user(user_id, data)

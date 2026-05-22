@@ -74,6 +74,22 @@ const router = createRouter({
           props: true,
         },
         {
+          path: 'roles',
+          name: 'roles',
+          component: () => import('@/role-management/views/RoleListView.vue'),
+        },
+        {
+          path: 'roles/new',
+          name: 'role-create',
+          component: () => import('@/role-management/views/RoleFormView.vue'),
+        },
+        {
+          path: 'roles/:id/edit',
+          name: 'role-edit',
+          component: () => import('@/role-management/views/RoleFormView.vue'),
+          props: true,
+        },
+        {
           path: 'users',
           name: 'users',
           component: () => import('@/user-management/views/UserListView.vue'),

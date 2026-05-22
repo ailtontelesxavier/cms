@@ -68,3 +68,12 @@ class UserRepository:
     async def delete(self, user: User) -> None:
         await self.session.delete(user)
         await self.session.flush()
+
+    async def assign_roles(self, user: User, role_ids: list[int]) -> None:
+        from app.infrastructure.postgres.models import Role as RoleModel
+
+        stmt = select(RoleModel).where(RoleModel.id.in_(role_ids))
+        result = await self.session.execute(stmt)
+        roles = list(result.scalars().all())
+        user.roles = roles
+        await self.session.flush()

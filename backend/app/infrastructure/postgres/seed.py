@@ -1,35 +1,20 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domain.auth.permissions import PERMISSOES_PADRAO
 from app.infrastructure.postgres.models import Permission, Role
-
-ROLES_PERMISSIONS = {
-    "Master": {
-        "auth": ["criar", "ler", "atualizar", "excluir"],
-        "posts": ["criar", "ler", "atualizar", "excluir"],
-        "tags": ["criar", "ler", "atualizar", "excluir"],
-    },
-    "Editor": {
-        "posts": ["criar", "ler", "atualizar"],
-        "tags": ["criar", "ler", "atualizar"],
-    },
-    "Externo": {
-        "posts": ["ler"],
-        "tags": ["ler"],
-    },
-}
 
 
 async def seed_roles_and_permissions(session: AsyncSession) -> None:
-    for role_name, modules in ROLES_PERMISSIONS.items():
+    for role_name, modules in PERMISSOES_PADRAO.items():
         existing = await session.execute(select(Role).where(Role.name == role_name))
         if existing.scalar_one_or_none():
             continue
-        role = Role(name=role_name, description=f"{role_name} role")
+        role = Role(name=role_name, description=f"{role_name}")
         session.add(role)
         await session.flush()
         for module, actions in modules.items():
             for action in actions:
-                perm = Permission(role_id=role.id, module=module, action=action)
+                perm = Permission(role_id=role.id, module=module, action=action.value)
                 session.add(perm)
     await session.commit()

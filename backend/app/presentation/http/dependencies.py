@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.application.auth.role_use_cases import RoleUseCases
 from app.application.auth.use_cases import AuthUseCases
 from app.application.posts.use_cases import PostUseCases
 from app.application.tags.use_cases import TagUseCases
@@ -14,6 +15,7 @@ from app.infrastructure.mongodb.client import get_mongo_db
 from app.infrastructure.mongodb.repositories.post_contents import PostContentRepository
 from app.infrastructure.postgres.database import get_session
 from app.infrastructure.postgres.repositories.posts import PostRepository
+from app.infrastructure.postgres.repositories.roles import RoleRepository
 from app.infrastructure.postgres.repositories.tags import TagRepository
 from app.infrastructure.postgres.repositories.users import UserRepository
 
@@ -44,8 +46,19 @@ async def get_auth_use_cases(repo: UserRepository = Depends(get_user_repo)) -> A
     return AuthUseCases(repo)
 
 
+async def get_role_repo(session: AsyncSession = Depends(get_db_session)) -> RoleRepository:
+    return RoleRepository(session)
+
+
 async def get_tag_use_cases(repo: TagRepository = Depends(get_tag_repo)) -> TagUseCases:
     return TagUseCases(repo)
+
+
+async def get_role_use_cases(
+    role_repo: RoleRepository = Depends(get_role_repo),
+    user_repo: UserRepository = Depends(get_user_repo),
+) -> RoleUseCases:
+    return RoleUseCases(role_repo, user_repo)
 
 
 async def get_post_use_cases(

@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from app.domain.auth.permissions import Acao, Modulo
+
 
 class LoginRequest(BaseModel):
     email: str = Field(..., max_length=255)
@@ -68,3 +70,43 @@ class UserUpdate(BaseModel):
 
 class UserPasswordUpdate(BaseModel):
     password: str = Field(..., min_length=8)
+
+
+class PermissionOut(BaseModel):
+    id: int
+    module: str
+    action: str
+
+    model_config = {"from_attributes": True}
+
+
+class RoleCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str | None = None
+
+
+class RoleUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+
+
+class PermissionCreate(BaseModel):
+    module: Modulo
+    action: Acao
+
+
+class RolePermissionUpdate(BaseModel):
+    permissions: list[PermissionCreate]
+
+
+class RoleOut(BaseModel):
+    id: int
+    name: str
+    description: str | None = None
+    permissions: list[PermissionOut] = []
+
+    model_config = {"from_attributes": True}
+
+
+class UserRoleAssign(BaseModel):
+    role_ids: list[int]

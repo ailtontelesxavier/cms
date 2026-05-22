@@ -17,6 +17,7 @@ from app.presentation.http.error_handlers import domain_error_handler
 from app.presentation.http.routers.auth import router as auth_router
 from app.presentation.http.routers.health import router as health_router
 from app.presentation.http.routers.posts import router as posts_router
+from app.presentation.http.routers.roles import router as roles_router
 from app.presentation.http.routers.tags import router as tags_router
 from app.presentation.http.routers.uploads import router as uploads_router
 from app.presentation.http.routers.users import router as users_router
@@ -55,6 +56,7 @@ app.add_exception_handler(DomainError, domain_error_handler)
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
+app.include_router(roles_router, prefix="/api/v1")
 app.include_router(tags_router, prefix="/api/v1")
 app.include_router(posts_router, prefix="/api/v1")
 app.include_router(uploads_router, prefix="/api/v1")

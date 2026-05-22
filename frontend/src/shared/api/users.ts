@@ -1,6 +1,7 @@
 import client from './client'
 import type { PaginatedResult } from '@/shared/types/api'
 import type { User, MfaSetupOut, MfaInfoOut } from '@/shared/types/auth'
+import type { UserRoleAssign } from '@/shared/types/roles'
 
 export const usersApi = {
   list(page = 1, pageSize = 20, q?: string) {
@@ -39,5 +40,9 @@ export const usersApi = {
 
   verifyMfa(userId: string, token: string) {
     return client.post(`/users/${userId}/mfa/verify`, { token })
+  },
+
+  assignRoles(userId: string, data: UserRoleAssign) {
+    return client.put(`/users/${userId}/roles`, data)
   },
 }
