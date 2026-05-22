@@ -6,6 +6,7 @@ from app.application.auth.ports import UserRepository
 from app.application.auth.schemas import (
     LoginRequest,
     MFAChallengeRequest,
+    MfaInfoOut,
     MFASetupOut,
     MFAVerifyRequest,
     TokenOut,
@@ -77,6 +78,25 @@ class AuthUseCases:
 
         return self._issue_tokens(user)
 
+    async def get_mfa_info(self, user_id: UUID) -> MfaInfoOut:
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise InvalidCredentialsError()
+
+        qrcode = None
+        secret = None
+        if user.totp_secret:
+            secret = user.totp_secret
+            uri = get_totp_uri(secret, user.email)
+            qrcode = generate_qrcode(uri)
+
+        return MfaInfoOut(
+            configured=user.totp_secret is not None,
+            enabled=user.mfa_enabled,
+            secret=secret,
+            qrcode=qrcode,
+        )
+
     async def setup_mfa(self, user_id: UUID) -> MFASetupOut:
         user = await self.user_repo.get_by_id(user_id)
         if not user:
@@ -104,9 +124,21 @@ class AuthUseCases:
 
         return self._issue_tokens(user)
 
+    async def verify_user_mfa(self, user_id: UUID, token: str) -> dict:
+        user = await self.user_repo.get_by_id(user_id)
+        if not user or not user.totp_secret:
+            raise InvalidCredentialsError()
+
+        if not verify_totp(user.totp_secret, token):
+            raise InvalidMFATokenError()
+
+        user.mfa_enabled = True
+        await self.user_repo.update(user)
+
+        return {"detail": "MFA ativado com sucesso"}
+
     async def create_user(self, data: UserCreate) -> UserOut:
-        agora_sp = datetime.now(ZoneInfo("America/Sao_Paulo"))
-        now = datetime.now(agora_sp)
+        now = datetime.now(ZoneInfo("America/Sao_Paulo"))
         user = User(
             email=data.email,
             name=data.name,

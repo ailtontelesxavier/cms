@@ -1,6 +1,6 @@
 import client from './client'
 import type { PaginatedResult } from '@/shared/types/api'
-import type { User } from '@/shared/types/auth'
+import type { User, MfaSetupOut, MfaInfoOut } from '@/shared/types/auth'
 
 export const usersApi = {
   list(page = 1, pageSize = 20, q?: string) {
@@ -27,5 +27,17 @@ export const usersApi = {
 
   delete(id: string) {
     return client.delete(`/users/${id}`)
+  },
+
+  getMfa(userId: string) {
+    return client.get<MfaInfoOut>(`/users/${userId}/mfa`)
+  },
+
+  setupMfa(userId: string) {
+    return client.post<MfaSetupOut>(`/users/${userId}/mfa/setup`)
+  },
+
+  verifyMfa(userId: string, token: string) {
+    return client.post(`/users/${userId}/mfa/verify`, { token })
   },
 }

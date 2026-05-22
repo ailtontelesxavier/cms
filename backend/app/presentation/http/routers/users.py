@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.application.auth.schemas import UserCreate, UserOut, UserPasswordUpdate, UserUpdate
+from app.application.auth.schemas import MfaInfoOut, MFASetupOut, MFAVerifyRequest, UserCreate, UserOut, UserPasswordUpdate, UserUpdate
 from app.application.auth.use_cases import AuthUseCases
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.domain.auth.entities import User
@@ -70,6 +70,34 @@ async def update_user_password(
     use_cases: AuthUseCases = Depends(get_auth_use_cases),
 ) -> None:
     await use_cases.update_user_password(user_id, data)
+
+
+@router.get("/{user_id}/mfa")
+async def get_user_mfa(
+    user_id: UUID,
+    _=Depends(require_permission("auth", "ler")),
+    use_cases: AuthUseCases = Depends(get_auth_use_cases),
+) -> MfaInfoOut:
+    return await use_cases.get_mfa_info(user_id)
+
+
+@router.post("/{user_id}/mfa/setup")
+async def setup_user_mfa(
+    user_id: UUID,
+    _=Depends(require_permission("auth", "atualizar")),
+    use_cases: AuthUseCases = Depends(get_auth_use_cases),
+) -> MFASetupOut:
+    return await use_cases.setup_mfa(user_id)
+
+
+@router.post("/{user_id}/mfa/verify")
+async def verify_user_mfa(
+    user_id: UUID,
+    data: MFAVerifyRequest,
+    _=Depends(require_permission("auth", "atualizar")),
+    use_cases: AuthUseCases = Depends(get_auth_use_cases),
+) -> dict:
+    return await use_cases.verify_user_mfa(user_id, data.token)
 
 
 @router.delete("/{user_id}", status_code=204)

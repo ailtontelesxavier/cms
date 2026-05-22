@@ -17,6 +17,6 @@ class TestTagsAPI:
         assert response.status_code in (200, 500)
 
     async def test_create_tag_no_auth(self, client):
-        data = {"name": "Test", "slug": "test"}
+        data = {"name": "Test"}
         response = await client.post("/api/v1/tags", json=data)
         assert response.status_code == 401

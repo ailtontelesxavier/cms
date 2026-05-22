@@ -64,7 +64,6 @@ onMounted(loadTags)
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Slug</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
           </tr>
@@ -72,7 +71,6 @@ onMounted(loadTags)
         <tbody class="divide-y divide-gray-200">
           <tr v-for="tag in tags" :key="tag.id" class="hover:bg-gray-50">
             <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ tag.name }}</td>
-            <td class="px-6 py-4 text-sm text-gray-500">{{ tag.slug }}</td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ tag.description || '—' }}</td>
             <td class="px-6 py-4 text-right text-sm">
               <button @click="router.push({ name: 'tag-edit', params: { id: tag.id } })"

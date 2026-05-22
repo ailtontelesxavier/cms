@@ -5,7 +5,7 @@ from app.application.tags.ports import TagRepository
 from app.application.tags.schemas import TagCreate, TagOut, TagUpdate
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.domain.tags.entities import Tag
-from app.domain.tags.exceptions import TagDuplicateError, TagNotFoundError
+from app.domain.tags.exceptions import TagNotFoundError
 
 
 class TagUseCases:
@@ -13,13 +13,9 @@ class TagUseCases:
         self.repo = repo
 
     async def create(self, data: TagCreate) -> TagOut:
-        existing = await self.repo.get_by_slug(data.slug)
-        if existing:
-            raise TagDuplicateError(data.slug)
         now = datetime.now(ZoneInfo("America/Sao_Paulo"))
         tag = Tag(
             name=data.name,
-            slug=data.slug,
             description=data.description,
             is_active=True,
             created_at=now,

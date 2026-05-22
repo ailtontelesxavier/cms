@@ -11,9 +11,6 @@ class TagRepository(ABC):
     async def get_by_id(self, tag_id: int) -> Tag | None: ...
 
     @abstractmethod
-    async def get_by_slug(self, slug: str) -> Tag | None: ...
-
-    @abstractmethod
     async def list_all(self, skip: int = 0, limit: int = 20) -> list[Tag]: ...
 
     @abstractmethod

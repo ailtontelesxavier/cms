@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
+from app.core.security import generate_totp_secret
+
 
 @dataclass
 class User:
@@ -11,7 +13,7 @@ class User:
     is_active: bool = True
     is_superuser: bool = False
     mfa_enabled: bool = False
-    totp_secret: str | None = None
+    totp_secret: str | None = field(default_factory=generate_totp_secret)
     id: UUID | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None

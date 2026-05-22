@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import factory
 
@@ -17,8 +18,8 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     is_active = True
     is_superuser = False
     mfa_enabled = False
-    created_at = factory.LazyFunction(datetime.utcnow)
-    updated_at = factory.LazyFunction(datetime.utcnow)
+    created_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))
+    updated_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))
 
 
 class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -27,8 +28,8 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     name = factory.Sequence(lambda n: f"Role{n}")
-    created_at = factory.LazyFunction(datetime.utcnow)
-    updated_at = factory.LazyFunction(datetime.utcnow)
+    created_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))
+    updated_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))
 
 
 class TagFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -37,10 +38,9 @@ class TagFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session_persistence = "flush"
 
     name = factory.Sequence(lambda n: f"Tag {n}")
-    slug = factory.Sequence(lambda n: f"tag-{n}")
     is_active = True
-    created_at = factory.LazyFunction(datetime.utcnow)
-    updated_at = factory.LazyFunction(datetime.utcnow)
+    created_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))
+    updated_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))
 
 
 class PostFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -52,5 +52,5 @@ class PostFactory(factory.alchemy.SQLAlchemyModelFactory):
     slug = factory.Sequence(lambda n: f"post-{n}")
     mongo_object_id = factory.Sequence(lambda n: f"{n:024x}")
     status = "draft"
-    created_at = factory.LazyFunction(datetime.utcnow)
-    updated_at = factory.LazyFunction(datetime.utcnow)
+    created_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))
+    updated_at = factory.LazyFunction(lambda: datetime.now(ZoneInfo("America/Sao_Paulo")))

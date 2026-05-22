@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import selectinload
 
+from app.domain.auth.entities import User as UserEntity
 from app.infrastructure.postgres.database import Base
 from app.infrastructure.postgres.models import User
 
@@ -11,10 +12,24 @@ class UserRepository:
     def __init__(self, session: Base) -> None:
         self.session = session
 
-    async def create(self, user: User) -> User:
-        self.session.add(user)
+    async def create(self, user: UserEntity) -> User:
+        model = User(
+            email=user.email,
+            name=user.name,
+            hashed_password=user.hashed_password,
+            is_active=user.is_active,
+            is_superuser=user.is_superuser,
+            mfa_enabled=user.mfa_enabled,
+            totp_secret=user.totp_secret,
+            id=user.id,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
+        self.session.add(model)
         await self.session.flush()
-        return user
+        stmt = select(User).options(selectinload(User.roles)).where(User.id == model.id)
+        result = await self.session.execute(stmt)
+        return result.unique().scalar_one()
 
     async def get_by_id(self, user_id: UUID) -> User | None:
         stmt = select(User).options(selectinload(User.roles)).where(User.id == user_id)

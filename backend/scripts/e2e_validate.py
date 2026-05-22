@@ -63,7 +63,7 @@ def main() -> int:
         r = httpx.get(f"{BASE_URL}/tags", headers=headers)
         check("List tags", r.is_success)
 
-        tag_data = {"name": "E2E Test Tag", "slug": f"e2e-test-{__import__('time').time()}", "description": "Created by E2E test"}
+        tag_data = {"name": "E2E Test Tag", "description": "Created by E2E test"}
         r = httpx.post(f"{BASE_URL}/tags", json=tag_data, headers=headers)
         check("Create tag", r.is_success and r.status_code == 201)
         if r.is_success:

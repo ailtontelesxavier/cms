@@ -1,6 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from app.domain.auth.entities import Role as RoleEntity
 from app.infrastructure.postgres.database import Base
 from app.infrastructure.postgres.models import Role
 
@@ -19,7 +20,12 @@ class RoleRepository:
         result = await self.session.execute(stmt)
         return list(result.unique().scalars().all())
 
-    async def create(self, role: Role) -> Role:
-        self.session.add(role)
+    async def create(self, role: RoleEntity) -> Role:
+        model = Role(
+            name=role.name,
+            description=role.description,
+            id=role.id,
+        )
+        self.session.add(model)
         await self.session.flush()
-        return role
+        return model

@@ -29,6 +29,13 @@ class MFAChallengeRequest(BaseModel):
     totp: str = Field(..., min_length=6, max_length=6)
 
 
+class MfaInfoOut(BaseModel):
+    configured: bool
+    enabled: bool
+    secret: str | None = None
+    qrcode: str | None = None
+
+
 class MFASetupOut(BaseModel):
     secret: str
     qrcode: str

@@ -5,7 +5,6 @@ from datetime import datetime
 @dataclass
 class Tag:
     name: str
-    slug: str
     description: str | None = None
     is_active: bool = True
     id: int | None = None

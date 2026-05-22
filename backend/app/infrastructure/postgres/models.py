@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import (
     Boolean,
@@ -27,8 +28,8 @@ class User(Base):
     is_superuser = Column(Boolean, default=False, nullable=False)
     mfa_enabled = Column(Boolean, default=False, nullable=False)
     totp_secret = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), onupdate=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
 
     roles = relationship("Role", secondary="user_roles", back_populates="users")
     posts = relationship("Post", back_populates="author")
@@ -40,8 +41,8 @@ class Role(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True, nullable=False)
     description = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), onupdate=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
 
     users = relationship("User", secondary="user_roles", back_populates="roles")
     permissions = relationship("Permission", back_populates="role", cascade="all, delete-orphan")
@@ -74,11 +75,10 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    slug = Column(String(100), unique=True, nullable=False, index=True)
     description = Column(String(500), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), onupdate=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
 
     posts = relationship("Post", secondary="post_tags", back_populates="tags")
 
@@ -92,9 +92,9 @@ class Post(Base):
     slug = Column(String(255), unique=True, nullable=False, index=True)
     status = Column(String(20), default="draft", nullable=False, index=True)
     author_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    published_at = Column(DateTime, nullable=True, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    published_at = Column(DateTime(timezone=True), nullable=True, index=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), onupdate=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)
 
     author = relationship("User", back_populates="posts")
     tags = relationship("Tag", secondary="post_tags", back_populates="posts")
@@ -122,4 +122,4 @@ class AuditLog(Base):
     metadata_ = Column("metadata", JSONB, nullable=True)
     ip_address = Column(String(50), nullable=True)
     user_agent = Column(String(500), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(ZoneInfo("America/Sao_Paulo")), nullable=False)

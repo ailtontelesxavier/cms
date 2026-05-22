@@ -1,7 +1,6 @@
 export interface Tag {
   id: number
   name: string
-  slug: string
   description: string | null
   is_active: boolean
   created_at: string
@@ -10,7 +9,6 @@ export interface Tag {
 
 export interface TagCreate {
   name: string
-  slug: string
   description?: string | null
 }
 

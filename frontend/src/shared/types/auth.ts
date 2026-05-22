@@ -27,6 +27,13 @@ export interface MfaChallengeRequest {
   totp: string
 }
 
+export interface MfaInfoOut {
+  configured: boolean
+  enabled: boolean
+  secret: string | null
+  qrcode: string | null
+}
+
 export interface MfaSetupOut {
   secret: string
   qrcode: string

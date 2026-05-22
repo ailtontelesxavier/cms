@@ -15,7 +15,6 @@ const errorMsg = ref('')
 
 const form = ref({
   name: '',
-  slug: '',
   description: '',
 })
 
@@ -25,7 +24,7 @@ async function loadTag() {
   try {
     const res = await tagsApi.getById(Number(route.params.id))
     const tag = res.data
-    form.value = { name: tag.name, slug: tag.slug, description: tag.description || '' }
+    form.value = { name: tag.name, description: tag.description || '' }
   } catch (err) {
     errorMsg.value = getApiErrorMessage(err)
   } finally {
@@ -46,7 +45,6 @@ async function handleSubmit() {
     } else {
       await tagsApi.create({
         name: form.value.name,
-        slug: form.value.slug,
         description: form.value.description || null,
       })
     }
@@ -80,12 +78,6 @@ onMounted(loadTag)
           <label for="name" class="block text-sm font-medium text-gray-700">Nome</label>
           <input id="name" v-model="form.name" type="text" required maxlength="100"
             class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500" />
-        </div>
-
-        <div>
-          <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
-          <input id="slug" v-model="form.slug" type="text" required maxlength="100" :disabled="isEdit"
-            class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:bg-gray-100 disabled:text-gray-500" />
         </div>
 
         <div>
