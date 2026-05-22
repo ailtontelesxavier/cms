@@ -1,5 +1,6 @@
 from datetime import datetime
 from uuid import UUID, uuid4
+from zoneinfo import ZoneInfo
 
 from slugify import slugify
 
@@ -34,7 +35,7 @@ class PostUseCases:
             slug = f"{base_slug}-{counter}"
             counter += 1
 
-        now = datetime.utcnow()
+        now = datetime.now(ZoneInfo("America/Sao_Paulo"))
         mongo_ref_id = str(uuid4())
 
         post = Post(
@@ -122,7 +123,7 @@ class PostUseCases:
                 {"html": data.html, "summary": data.summary or ""},
             )
 
-        post.updated_at = datetime.utcnow()
+        post.updated_at = datetime.now(ZoneInfo("America/Sao_Paulo"))
         updated = await self.post_repo.update(post)
         return PostOut.model_validate(updated)
 
@@ -138,8 +139,8 @@ class PostUseCases:
             raise PostContentMissingError()
 
         post.status = "published"
-        post.published_at = datetime.utcnow()
-        post.updated_at = datetime.utcnow()
+        post.published_at = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        post.updated_at = datetime.now(ZoneInfo("America/Sao_Paulo"))
         updated = await self.post_repo.update(post)
         return PostOut.model_validate(updated)
 
@@ -151,7 +152,7 @@ class PostUseCases:
             raise InvalidStatusTransitionError(post.status, "archived")
 
         post.status = "archived"
-        post.updated_at = datetime.utcnow()
+        post.updated_at = datetime.now(ZoneInfo("America/Sao_Paulo"))
         updated = await self.post_repo.update(post)
         return PostOut.model_validate(updated)
 

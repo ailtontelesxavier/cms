@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from app.application.auth.ports import UserRepository
 from app.application.auth.schemas import (
@@ -104,7 +105,8 @@ class AuthUseCases:
         return self._issue_tokens(user)
 
     async def create_user(self, data: UserCreate) -> UserOut:
-        now = datetime.utcnow()
+        agora_sp = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        now = datetime.now(agora_sp)
         user = User(
             email=data.email,
             name=data.name,
@@ -129,13 +131,14 @@ class AuthUseCases:
 
     async def update_user(self, user_id: UUID, data: UserUpdate) -> UserOut:
         user = await self.user_repo.get_by_id(user_id)
+        datetime.now(ZoneInfo("America/Sao_Paulo"))
         if not user:
             raise InvalidCredentialsError()
         if data.name is not None:
             user.name = data.name
         if data.is_active is not None:
             user.is_active = data.is_active
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(ZoneInfo("America/Sao_Paulo"))
         updated = await self.user_repo.update(user)
         return UserOut.model_validate(updated)
 
@@ -144,7 +147,7 @@ class AuthUseCases:
         if not user:
             raise InvalidCredentialsError()
         user.hashed_password = hash_password(data.password)
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(ZoneInfo("America/Sao_Paulo"))
         await self.user_repo.update(user)
 
     async def delete_user(self, user_id: UUID) -> None:

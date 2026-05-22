@@ -1,5 +1,6 @@
 import secrets
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pyotp
 import qrcode
@@ -21,7 +22,7 @@ def verify_password(password: str, hashed: str) -> bool:
 
 
 def create_token(sub: str, email: str, roles: list[str], expires_delta: timedelta | None = None) -> str:
-    now = datetime.now(UTC)
+    now = datetime.now(ZoneInfo("America/Sao_Paulo"))
     payload = {
         "sub": sub,
         "email": email,
@@ -50,7 +51,9 @@ def generate_qrcode(uri: str) -> str:
 
 
 def verify_totp(secret: str, token: str) -> bool:
-    return pyotp.TOTP(secret).verify(token)
+    otp = pyotp.TOTP(secret)
+    # print(otp.now())
+    return otp.verify(token)
 
 
 def generate_safe_filename() -> str:

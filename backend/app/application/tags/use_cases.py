@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from app.application.tags.ports import TagRepository
 from app.application.tags.schemas import TagCreate, TagOut, TagUpdate
@@ -15,7 +16,7 @@ class TagUseCases:
         existing = await self.repo.get_by_slug(data.slug)
         if existing:
             raise TagDuplicateError(data.slug)
-        now = datetime.utcnow()
+        now = datetime.now(ZoneInfo("America/Sao_Paulo"))
         tag = Tag(
             name=data.name,
             slug=data.slug,
@@ -47,7 +48,7 @@ class TagUseCases:
             tag.name = data.name
         if data.description is not None:
             tag.description = data.description
-        tag.updated_at = datetime.utcnow()
+        tag.updated_at = datetime.now(ZoneInfo("America/Sao_Paulo"))
         updated = await self.repo.update(tag)
         return TagOut.model_validate(updated)
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from bson import ObjectId
 from motor.motor_asyncio import AsyncIOMotorDatabase
@@ -20,8 +21,8 @@ class PostContentRepository:
             "summary": summary,
             "cover_image": None,
             "images": [],
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at": datetime.now(ZoneInfo("America/Sao_Paulo")),
+            "updated_at": datetime.now(ZoneInfo("America/Sao_Paulo")),
         }
         if document_id:
             doc["_id"] = document_id
@@ -35,7 +36,7 @@ class PostContentRepository:
         return await self.collection.find_one({"post_ref_id": post_ref_id})
 
     async def update(self, object_id: str | ObjectId, data: dict[str, Any]) -> bool:
-        data["updated_at"] = datetime.utcnow()
+        data["updated_at"] = datetime.now(ZoneInfo("America/Sao_Paulo"))
         result = await self.collection.update_one(
             {"_id": self._to_object_id(object_id)}, {"$set": data}
         )
@@ -50,7 +51,7 @@ class PostContentRepository:
             {"_id": self._to_object_id(object_id)},
             {
                 "$push": {"images": image},
-                "$set": {"updated_at": datetime.utcnow()},
+                "$set": {"updated_at": datetime.now(ZoneInfo("America/Sao_Paulo"))},
             },
         )
         return result.modified_count > 0
@@ -60,7 +61,7 @@ class PostContentRepository:
             {"_id": self._to_object_id(object_id)},
             {
                 "$pull": {"images": {"object_key": object_key}},
-                "$set": {"updated_at": datetime.utcnow()},
+                "$set": {"updated_at": datetime.now(ZoneInfo("America/Sao_Paulo"))},
             },
         )
         return result.modified_count > 0

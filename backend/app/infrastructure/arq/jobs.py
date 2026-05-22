@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 
 async def cleanup_orphan_contents(ctx: dict) -> None:
     db = ctx["mongo_db"]
-    cutoff = datetime.utcnow() - timedelta(hours=24)
+    cutoff = datetime.now(ZoneInfo("America/Sao_Paulo")) - timedelta(hours=24)
     result = await db.post_contents.delete_many({
         "post_ref_id": "",
         "created_at": {"$lt": cutoff},
