@@ -109,14 +109,17 @@ onMounted(loadUsers)
               </span>
             </td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(user.created_at).toLocaleDateString('pt-BR') }}</td>
-            <td class="px-6 py-4 text-right text-sm">
-              <button @click="router.push({ name: 'user-edit', params: { id: user.id } })"
-                class="text-sky-600 hover:text-sky-500 mr-3">
-                Editar
-              </button>
-              <button @click="handleDelete(user)" class="text-red-600 hover:text-red-500">
-                Excluir
-              </button>
+            <td class="px-6 py-4 text-sm">
+              <div class="flex items-center justify-end gap-2">
+                <button @click="router.push({ name: 'user-edit', params: { id: user.id } })"
+                  class="rounded-md border border-sky-300 px-3 py-1.5 text-sm font-medium text-sky-700 hover:bg-sky-50">
+                  Editar
+                </button>
+                <button @click="handleDelete(user)"
+                  class="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                  Excluir
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

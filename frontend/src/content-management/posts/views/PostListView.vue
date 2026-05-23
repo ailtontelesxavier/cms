@@ -169,22 +169,27 @@ onMounted(() => void loadPosts())
               {{ post.tags.map(t => t.name).join(', ') || '—' }}
             </td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(post.created_at).toLocaleDateString('pt-BR') }}</td>
-            <td class="px-6 py-4 text-right text-sm">
-              <button @click="router.push({ name: 'post-edit', params: { id: post.id } })"
-                class="text-sky-600 hover:text-sky-500 mr-2">
-                Editar
-              </button>
-              <button v-if="post.status === 'draft' || post.status === 'review'"
-                @click="openDialog('publish', post)" class="text-green-600 hover:text-green-500 mr-2">
-                Publicar
-              </button>
-              <button v-if="post.status !== 'archived'"
-                @click="openDialog('archive', post)" class="text-amber-600 hover:text-amber-500 mr-2">
-                Arquivar
-              </button>
-              <button @click="openDialog('delete', post)" class="text-red-600 hover:text-red-500">
-                Excluir
-              </button>
+            <td class="px-6 py-4 text-sm">
+              <div class="flex items-center justify-end gap-2">
+                <button @click="router.push({ name: 'post-edit', params: { id: post.id } })"
+                  class="rounded-md border border-sky-300 px-3 py-1.5 text-sm font-medium text-sky-700 hover:bg-sky-50">
+                  Editar
+                </button>
+                <button v-if="post.status === 'draft' || post.status === 'review'"
+                  @click="openDialog('publish', post)"
+                  class="rounded-md border border-green-300 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-50">
+                  Publicar
+                </button>
+                <button v-if="post.status !== 'archived'"
+                  @click="openDialog('archive', post)"
+                  class="rounded-md border border-amber-300 px-3 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-50">
+                  Arquivar
+                </button>
+                <button @click="openDialog('delete', post)"
+                  class="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                  Excluir
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

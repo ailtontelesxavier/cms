@@ -6,6 +6,10 @@ export const rolesApi = {
     return client.get<Role[]>('/roles')
   },
 
+  getEnums() {
+    return client.get<{ modulos: string[]; acoes: string[] }>('/roles/enums')
+  },
+
   getById(id: number) {
     return client.get<Role>(`/roles/${id}`)
   },

@@ -78,14 +78,17 @@ onMounted(loadRoles)
                 <span v-if="role.permissions.length === 0" class="text-gray-400">Nenhuma</span>
               </div>
             </td>
-            <td class="px-6 py-4 text-right text-sm">
-              <button @click="router.push({ name: 'role-edit', params: { id: role.id } })"
-                class="text-sky-600 hover:text-sky-500 mr-3">
-                Editar
-              </button>
-              <button @click="handleDelete(role)" class="text-red-600 hover:text-red-500">
-                Excluir
-              </button>
+            <td class="px-6 py-4 text-sm">
+              <div class="flex items-center justify-end gap-2">
+                <button @click="router.push({ name: 'role-edit', params: { id: role.id } })"
+                  class="rounded-md border border-sky-300 px-3 py-1.5 text-sm font-medium text-sky-700 hover:bg-sky-50">
+                  Editar
+                </button>
+                <button @click="handleDelete(role)"
+                  class="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                  Excluir
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

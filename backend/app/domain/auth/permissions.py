@@ -6,27 +6,28 @@ class Acao(str, Enum):
     LER = "ler"
     ATUALIZAR = "atualizar"
     EXCLUIR = "excluir"
-    HOMOLOGAR = "homologar"
     ASSINAR = "assinar"
     ADMINISTRAR = "administrar"
-    SUPERUSER = "superuser"
+    RELATORIOS = "relatorios"
 
 
 class Modulo(str, Enum):
+    PERMISSAO = "permissao"
     ADMINISTRATIVO = "administrativo"
-    EDUCACIONAL = "educacional"
-    AVALIACOES = "avaliacoes"
+    AUTH = "auth"
+    POSTS = "posts"
     DOCUMENTOS = "documentos"
     PROCESSOS = "processos"
     AUDITORIA = "auditoria"
     RELATORIOS = "relatorios"
+    FROTA = "frota"
 
 
 PERMISSOES_PADRAO: dict[str, dict[str, list[Acao]]] = {
-    "Administrador Master": {
+    "Administrador": {
         Modulo.ADMINISTRATIVO.value: list(Acao),
-        Modulo.EDUCACIONAL.value: list(Acao),
-        Modulo.AVALIACOES.value: list(Acao),
+        Modulo.AUTH.value: list(Acao),
+        Modulo.POSTS.value: list(Acao),
         Modulo.PROCESSOS.value: list(Acao),
         Modulo.RELATORIOS.value: list(Acao),
         Modulo.AUDITORIA.value: list(Acao),
@@ -34,40 +35,27 @@ PERMISSOES_PADRAO: dict[str, dict[str, list[Acao]]] = {
     },
     "Diretor": {
         Modulo.ADMINISTRATIVO.value: [Acao.LER, Acao.ATUALIZAR],
-        Modulo.EDUCACIONAL.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
-        Modulo.AVALIACOES.value: [Acao.LER, Acao.HOMOLOGAR],
+        Modulo.AUTH.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
+        Modulo.POSTS.value: [Acao.LER, Acao.ATUALIZAR],
         Modulo.PROCESSOS.value: [Acao.CRIAR, Acao.LER, Acao.ASSINAR],
         Modulo.RELATORIOS.value: [Acao.LER],
         Modulo.DOCUMENTOS.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR, Acao.ASSINAR],
     },
     "Secretario": {
         Modulo.ADMINISTRATIVO.value: [Acao.LER],
-        Modulo.EDUCACIONAL.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
-        Modulo.AVALIACOES.value: [Acao.LER],
+        Modulo.AUTH.value: [Acao.LER,],
+        Modulo.POSTS.value: [Acao.LER, Acao.ATUALIZAR],
         Modulo.PROCESSOS.value: [Acao.CRIAR, Acao.LER],
         Modulo.RELATORIOS.value: [Acao.LER],
     },
-    "Coordenador Pedagogico": {
-        Modulo.EDUCACIONAL.value: [Acao.LER, Acao.ATUALIZAR],
-        Modulo.AVALIACOES.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
+    "Editor": {
+        Modulo.POSTS.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
+        Modulo.PROCESSOS.value: [Acao.LER],
+        Modulo.RELATORIOS.value: [Acao.LER],
+    },
+    "Usuario": {
+        Modulo.POSTS.value: [Acao.LER],
         Modulo.PROCESSOS.value: [Acao.LER],
         Modulo.RELATORIOS.value: [Acao.CRIAR, Acao.LER],
-    },
-    "Coordenador de Area": {
-        Modulo.AVALIACOES.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
-        Modulo.RELATORIOS.value: [Acao.LER],
-    },
-    "Professor": {
-        Modulo.AVALIACOES.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
-        Modulo.RELATORIOS.value: [Acao.LER],
-    },
-    "Professor Orientador": {
-        Modulo.EDUCACIONAL.value: [Acao.LER],
-        Modulo.AVALIACOES.value: [Acao.CRIAR, Acao.LER, Acao.ATUALIZAR],
-        Modulo.RELATORIOS.value: [Acao.LER],
-    },
-    "Parecerista": {
-        Modulo.PROCESSOS.value: [Acao.LER, Acao.CRIAR],
-        Modulo.RELATORIOS.value: [Acao.LER],
     },
 }

@@ -72,14 +72,17 @@ onMounted(loadTags)
           <tr v-for="tag in tags" :key="tag.id" class="hover:bg-gray-50">
             <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ tag.name }}</td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ tag.description || '—' }}</td>
-            <td class="px-6 py-4 text-right text-sm">
-              <button @click="router.push({ name: 'tag-edit', params: { id: tag.id } })"
-                class="text-sky-600 hover:text-sky-500 mr-3">
-                Editar
-              </button>
-              <button @click="handleDelete(tag)" class="text-red-600 hover:text-red-500">
-                Excluir
-              </button>
+            <td class="px-6 py-4 text-sm">
+              <div class="flex items-center justify-end gap-2">
+                <button @click="router.push({ name: 'tag-edit', params: { id: tag.id } })"
+                  class="rounded-md border border-sky-300 px-3 py-1.5 text-sm font-medium text-sky-700 hover:bg-sky-50">
+                  Editar
+                </button>
+                <button @click="handleDelete(tag)"
+                  class="rounded-md border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50">
+                  Excluir
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

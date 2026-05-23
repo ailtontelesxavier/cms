@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { rolesApi } from '@/shared/api/roles'
+import LoadingSpinner from '@/shared/ui/LoadingSpinner.vue'
 import { getApiErrorMessage } from '@/shared/api/client'
 
 const router = useRouter()
+const route = useRoute()
 
 const FALLBACK_MODULOS = [
   'permissao', 'administrativo', 'auth', 'posts',
@@ -19,6 +21,7 @@ const FALLBACK_ACOES = [
 const modulos = ref<string[]>([])
 const acoes = ref<string[]>([])
 const enumsLoading = ref(true)
+const loading = ref(true)
 const saving = ref(false)
 const errorMsg = ref('')
 
@@ -83,16 +86,31 @@ const groupedPermissions = computed(() => {
   return grouped
 })
 
+async function loadRole() {
+  if (!route.params.id) return
+  loading.value = true
+  try {
+    const res = await rolesApi.getById(Number(route.params.id))
+    const role = res.data
+    form.value = { name: role.name, description: role.description || '' }
+    permissions.value = role.permissions.map(p => ({ module: p.module, action: p.action }))
+  } catch (err) {
+    errorMsg.value = getApiErrorMessage(err)
+  } finally {
+    loading.value = false
+  }
+}
+
 async function handleSubmit() {
   saving.value = true
   errorMsg.value = ''
 
   try {
-    const roleRes = await rolesApi.create({
+    await rolesApi.update(Number(route.params.id), {
       name: form.value.name,
       description: form.value.description || null,
     })
-    await rolesApi.updatePermissions(roleRes.data.id, {
+    await rolesApi.updatePermissions(Number(route.params.id), {
       permissions: permissions.value,
     })
     router.push({ name: 'roles' })
@@ -103,14 +121,18 @@ async function handleSubmit() {
   }
 }
 
-onMounted(loadEnums)
+onMounted(async () => {
+  await Promise.all([loadEnums(), loadRole()])
+})
 </script>
 
 <template>
   <div class="mx-auto max-w-lg">
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">Novo Perfil</h1>
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Editar Perfil</h1>
 
-    <div class="rounded-lg border border-gray-200 bg-white p-6">
+    <LoadingSpinner v-if="loading" />
+
+    <div v-else class="rounded-lg border border-gray-200 bg-white p-6">
       <div v-if="errorMsg"
         class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
         {{ errorMsg }}

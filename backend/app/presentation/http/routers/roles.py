@@ -29,6 +29,14 @@ async def create_role(
     return await use_cases.create_role(data)
 
 
+@router.get("/enums")
+async def get_permission_enums() -> dict:
+    return {
+        "modulos": [m.value for m in Modulo],
+        "acoes": [a.value for a in Acao],
+    }
+
+
 @router.get("/{role_id}")
 async def get_role(
     role_id: int,
