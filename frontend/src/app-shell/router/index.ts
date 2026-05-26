@@ -1,9 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useSessionStore } from '@/auth-session/stores/session'
+import { authGuard } from '@/app-shell/guards/auth.guard'
+import { mfaGuard } from '@/app-shell/guards/mfa.guard'
+import { permissionGuard } from '@/app-shell/guards/permission.guard'
 
 declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean
+    requiresMfa?: boolean
+    module?: string
+    action?: string
   }
 }
 
@@ -110,16 +115,8 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, _from, next) => {
-  const session = useSessionStore()
-
-  if (to.meta.requiresAuth && !session.isAuthenticated) {
-    next({ name: 'login', query: { redirect: to.fullPath } })
-  } else if (to.name === 'login' && session.isAuthenticated) {
-    next({ name: 'posts' })
-  } else {
-    next()
-  }
-})
+router.beforeEach(authGuard)
+router.beforeEach(mfaGuard)
+router.beforeEach(permissionGuard)
 
 export default router
