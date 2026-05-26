@@ -60,19 +60,20 @@ onMounted(loadTags)
     <EmptyState v-else-if="tags.length === 0" />
 
     <div v-else class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
+            <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+            <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
+            <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
           <tr v-for="tag in tags" :key="tag.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ tag.name }}</td>
-            <td class="px-6 py-4 text-sm text-gray-500">{{ tag.description || '—' }}</td>
-            <td class="px-6 py-4 text-sm">
+            <td class="px-4 md:px-6 py-4 text-sm font-medium text-gray-900">{{ tag.name }}</td>
+            <td class="px-4 md:px-6 py-4 text-sm text-gray-500">{{ tag.description || '—' }}</td>
+            <td class="px-4 md:px-6 py-4 text-sm">
               <div class="flex items-center justify-end gap-2">
                 <button @click="router.push({ name: 'tag-edit', params: { id: tag.id } })"
                   class="rounded-md border border-sky-300 px-3 py-1.5 text-sm font-medium text-sky-700 hover:bg-sky-50">
@@ -87,6 +88,7 @@ onMounted(loadTags)
           </tr>
         </tbody>
       </table>
+      </div>
 
       <PaginationFooter
         :page="page"

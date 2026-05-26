@@ -75,22 +75,23 @@ onMounted(loadUsers)
     <EmptyState v-else-if="users.length === 0" />
 
     <div v-else class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ativo</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">MFA</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Criado em</th>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
+            <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+            <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+            <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ativo</th>
+            <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">MFA</th>
+            <th class="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Criado em</th>
+            <th class="px-4 md:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
           <tr v-for="user in users" :key="user.id" class="hover:bg-gray-50">
-            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ user.name }}</td>
-            <td class="px-6 py-4 text-sm text-gray-500">{{ user.email }}</td>
-            <td class="px-6 py-4">
+            <td class="px-4 md:px-6 py-4 text-sm font-medium text-gray-900">{{ user.name }}</td>
+            <td class="px-4 md:px-6 py-4 text-sm text-gray-500">{{ user.email }}</td>
+            <td class="px-4 md:px-6 py-4">
               <span
                 class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
                 :class="user.is_active
@@ -99,7 +100,7 @@ onMounted(loadUsers)
                 {{ user.is_active ? 'Sim' : 'Não' }}
               </span>
             </td>
-            <td class="px-6 py-4">
+            <td class="px-4 md:px-6 py-4">
               <span
                 class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium"
                 :class="user.mfa_enabled
@@ -108,8 +109,8 @@ onMounted(loadUsers)
                 {{ user.mfa_enabled ? 'Ativo' : 'Inativo' }}
               </span>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(user.created_at).toLocaleDateString('pt-BR') }}</td>
-            <td class="px-6 py-4 text-sm">
+            <td class="px-4 md:px-6 py-4 text-sm text-gray-500">{{ new Date(user.created_at).toLocaleDateString('pt-BR') }}</td>
+            <td class="px-4 md:px-6 py-4 text-sm">
               <div class="flex items-center justify-end gap-2">
                 <button @click="router.push({ name: 'user-edit', params: { id: user.id } })"
                   class="rounded-md border border-sky-300 px-3 py-1.5 text-sm font-medium text-sky-700 hover:bg-sky-50">
@@ -124,6 +125,7 @@ onMounted(loadUsers)
           </tr>
         </tbody>
       </table>
+      </div>
 
       <PaginationFooter
         :page="page"

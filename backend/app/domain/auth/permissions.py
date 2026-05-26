@@ -23,6 +23,8 @@ class Modulo(str, Enum):
     FROTA = "frota"
 
 
+# """Permissões padrão para cada perfil. Essas permissões são atribuídas automaticamente
+# quando um perfil é criado, mas podem ser personalizadas posteriormente."""
 PERMISSOES_PADRAO: dict[str, dict[str, list[Acao]]] = {
     "Administrador": {
         Modulo.ADMINISTRATIVO.value: list(Acao),
