@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.domain.auth.permissions import Acao, Modulo
 
@@ -61,6 +61,13 @@ class UserOut(BaseModel):
     roles: list[str] = []
 
     model_config = {"from_attributes": True}
+
+    @field_validator("roles", mode="before")
+    @classmethod
+    def coerce_roles(cls, v: object) -> list[str]:
+        if isinstance(v, list):
+            return [r.name if hasattr(r, "name") else str(r) for r in v]
+        return v if isinstance(v, list) else []
 
 
 class UserUpdate(BaseModel):
