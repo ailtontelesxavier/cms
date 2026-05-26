@@ -27,6 +27,7 @@ export const useSessionStore = defineStore('session', () => {
   const accessToken = ref<string | null>(null)
   const refreshToken = ref<string | null>(null)
   const currentUser = ref<User | null>(null)
+  const permissions = ref<{ module: string; action: string }[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -42,6 +43,15 @@ export const useSessionStore = defineStore('session', () => {
       refresh_token: rToken || null,
       user,
     }))
+  }
+
+  async function loadPermissions() {
+    try {
+      const res = await authApi.myPermissions()
+      permissions.value = res.data
+    } catch {
+      permissions.value = []
+    }
   }
 
   function restoreFromStorage(): SessionData | null {
@@ -68,6 +78,7 @@ export const useSessionStore = defineStore('session', () => {
       const user = userRes.data
 
       persistSession(access_token, user, refresh_token)
+      await loadPermissions()
       return user
     } catch (err: unknown) {
       const detail = getErrorDetail(err)
@@ -94,6 +105,7 @@ export const useSessionStore = defineStore('session', () => {
       const user = userRes.data
 
       persistSession(access_token, user, refresh_token)
+      await loadPermissions()
       return user
     } catch (err: unknown) {
       error.value = 'Código MFA inválido'
@@ -116,6 +128,7 @@ export const useSessionStore = defineStore('session', () => {
       const userRes = await authApi.me()
       currentUser.value = userRes.data
       persistSession(saved.access_token, userRes.data, saved.refresh_token)
+      await loadPermissions()
       return true
     } catch {
       if (saved.refresh_token) {
@@ -146,6 +159,7 @@ export const useSessionStore = defineStore('session', () => {
       setAuthToken(access_token)
       const userRes = await authApi.me()
       persistSession(access_token, userRes.data, refresh_token)
+      await loadPermissions()
       return true
     } catch {
       clearSession()
@@ -164,12 +178,20 @@ export const useSessionStore = defineStore('session', () => {
     setAuthToken(access_token)
     const userRes = await authApi.me()
     persistSession(access_token, userRes.data, refresh_token)
+    await loadPermissions()
+  }
+
+  function userHasPermission(module: string, action: string): boolean {
+    if (!currentUser.value) return false
+    if (currentUser.value.is_superuser) return true
+    return permissions.value.some(p => p.module === module && p.action === action)
   }
 
   return {
     accessToken,
     refreshToken,
     currentUser,
+    permissions,
     loading,
     error,
     isAuthenticated,
@@ -180,6 +202,8 @@ export const useSessionStore = defineStore('session', () => {
     clearSession,
     setupMfa,
     verifyMfa,
+    loadPermissions,
+    userHasPermission,
   }
 })
 

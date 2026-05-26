@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 
 from app.application.auth.role_use_cases import RoleUseCases
-from app.application.auth.schemas import MfaInfoOut, MFASetupOut, MFAVerifyRequest, UserCreate, UserOut, UserPasswordUpdate, UserRoleAssign, UserUpdate
+from app.application.auth.schemas import MfaInfoOut, MFASetupOut, MFAVerifyRequest, PermissionOut, UserCreate, UserOut, UserPasswordUpdate, UserRoleAssign, UserUpdate
 from app.application.auth.use_cases import AuthUseCases
 from app.core.pagination import PaginatedParams, PaginatedResult
 from app.domain.auth.entities import User
@@ -23,6 +23,14 @@ async def get_me(
     current_user: User = Depends(get_current_user),
 ) -> UserOut:
     return UserOut.model_validate(current_user)
+
+
+@router.get("/me/permissions")
+async def get_my_permissions(
+    current_user: User = Depends(get_current_user),
+    use_cases: AuthUseCases = Depends(get_auth_use_cases),
+) -> list[PermissionOut]:
+    return await use_cases.get_my_permissions(current_user.id)
 
 
 @router.get("")

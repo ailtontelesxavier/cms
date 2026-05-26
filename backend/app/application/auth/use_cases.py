@@ -9,6 +9,7 @@ from app.application.auth.schemas import (
     MfaInfoOut,
     MFASetupOut,
     MFAVerifyRequest,
+    PermissionOut,
     TokenOut,
     UserCreate,
     UserOut,
@@ -77,6 +78,20 @@ class AuthUseCases:
             raise InvalidMFATokenError()
 
         return self._issue_tokens(user)
+
+    async def get_my_permissions(self, user_id: UUID) -> list[PermissionOut]:
+        user = await self.user_repo.get_by_id(user_id)
+        if not user:
+            raise InvalidCredentialsError()
+        seen: set[tuple[str, str]] = set()
+        perms: list[PermissionOut] = []
+        for role in user.roles:
+            for perm in role.permissions:
+                key = (perm.module, perm.action)
+                if key not in seen:
+                    seen.add(key)
+                    perms.append(PermissionOut.model_validate(perm))
+        return perms
 
     async def get_mfa_info(self, user_id: UUID) -> MfaInfoOut:
         user = await self.user_repo.get_by_id(user_id)

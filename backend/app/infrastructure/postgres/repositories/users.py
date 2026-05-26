@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.domain.auth.entities import User as UserEntity
 from app.infrastructure.postgres.database import Base
-from app.infrastructure.postgres.models import User
+from app.infrastructure.postgres.models import Role, User
 
 
 class UserRepository:
@@ -27,22 +27,22 @@ class UserRepository:
         )
         self.session.add(model)
         await self.session.flush()
-        stmt = select(User).options(selectinload(User.roles)).where(User.id == model.id)
+        stmt = select(User).options(selectinload(User.roles).selectinload(Role.permissions)).where(User.id == model.id)
         result = await self.session.execute(stmt)
         return result.unique().scalar_one()
 
     async def get_by_id(self, user_id: UUID) -> User | None:
-        stmt = select(User).options(selectinload(User.roles)).where(User.id == user_id)
+        stmt = select(User).options(selectinload(User.roles).selectinload(Role.permissions)).where(User.id == user_id)
         result = await self.session.execute(stmt)
         return result.unique().scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> User | None:
-        stmt = select(User).options(selectinload(User.roles)).where(User.email == email)
+        stmt = select(User).options(selectinload(User.roles).selectinload(Role.permissions)).where(User.email == email)
         result = await self.session.execute(stmt)
         return result.unique().scalar_one_or_none()
 
     async def list_all(self, skip: int = 0, limit: int = 20, q: str | None = None) -> list[User]:
-        stmt = select(User).options(selectinload(User.roles))
+        stmt = select(User).options(selectinload(User.roles).selectinload(Role.permissions))
         if q:
             stmt = stmt.where(
                 or_(User.name.ilike(f'%{q}%'), User.email.ilike(f'%{q}%'))

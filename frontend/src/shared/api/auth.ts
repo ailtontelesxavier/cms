@@ -18,6 +18,10 @@ export const authApi = {
     return client.get<User>('/users/me')
   },
 
+  myPermissions() {
+    return client.get<{ module: string; action: string }[]>('/users/me/permissions')
+  },
+
   mfaSetup() {
     return client.post<MfaSetupOut>('/auth/mfa/setup')
   },
